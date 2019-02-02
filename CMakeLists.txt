@@ -5,11 +5,16 @@ project(RTSGame)
 # Source Files
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
+set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+include_directories(${INCLUDE_DIR})
+
 set(SRC "${SRC_DIR}/main.cpp")
 
 # Executable Definition
 add_executable(${PROJECT_NAME} ${SRC})
-target_include_directories(${PROJECT_NAME} PRIVATE "${SRC_DIR}")
+target_include_directories(${PROJECT_NAME} PRIVATE "${SRC_DIR}" "${INCLUDE_DIR}")
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 
 # GLFW
 set(GLFW_DIR "${LIB_DIR}/glfw")
