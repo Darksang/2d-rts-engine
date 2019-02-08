@@ -9,7 +9,21 @@ set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 include_directories(${INCLUDE_DIR})
 
-set(SRC "${SRC_DIR}/main.cpp")
+set(SRC ${SRC_DIR}/main.cpp
+        ${SRC_DIR}/imgui/imconfig.h
+        ${SRC_DIR}/imgui/imgui_demo.cpp
+        ${SRC_DIR}/imgui/imgui_draw.cpp
+        ${SRC_DIR}/imgui/imgui_internal.h
+        ${SRC_DIR}/imgui/imgui_widgets.cpp
+        ${SRC_DIR}/imgui/imgui.cpp
+        ${SRC_DIR}/imgui/imgui.h
+        ${SRC_DIR}/imgui/imstb_rectpack.h
+        ${SRC_DIR}/imgui/imstb_textedit.h
+        ${SRC_DIR}/imgui/imstb_truetype.h
+        ${SRC_DIR}/imgui/imgui_impl_glfw.cpp
+        ${SRC_DIR}/imgui/imgui_impl_glfw.h
+        ${SRC_DIR}/imgui/imgui_impl_opengl3.cpp
+        ${SRC_DIR}/imgui/imgui_impl_opengl3.h)
 
 # Executable Definition
 add_executable(${PROJECT_NAME} ${SRC})
