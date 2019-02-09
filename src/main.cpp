@@ -8,25 +8,13 @@
 
 #include <iostream>
 
+#include "shader.h"
+
 const unsigned int SCREEN_WIDTH = 800;
 const unsigned int SCREEN_HEIGHT = 600;
 
 void FramebufferSizeCallback(GLFWwindow * Window, int Width, int Height);
 void KeyCallback(GLFWwindow * Window, int Key, int Scancode, int Action, int Mods);
-
-const char * VertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
-
-const char * FragmentShaderSource = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\n\0";
 
 int main(int argc, char * argv[]) {
    // Initialize GLFW
@@ -62,43 +50,7 @@ int main(int argc, char * argv[]) {
        return -1;
    }
 
-   // vertex shader
-   int VertexShader = glCreateShader(GL_VERTEX_SHADER);
-   glShaderSource(VertexShader, 1, &VertexShaderSource, NULL);
-   glCompileShader(VertexShader);
-   // check for shader compile errors
-   int Success;
-   char InfoLog[512];
-   glGetShaderiv(VertexShader, GL_COMPILE_STATUS, &Success);
-   if (!Success) {
-      glGetShaderInfoLog(VertexShader, 512, NULL, InfoLog);
-      std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << InfoLog << std::endl;
-   }
-
-   // fragment shader
-   int FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-   glShaderSource(FragmentShader, 1, &FragmentShaderSource, NULL);
-   glCompileShader(FragmentShader);
-   // check for shader compile errors
-   glGetShaderiv(FragmentShader, GL_COMPILE_STATUS, &Success);
-   if (!Success) {
-      glGetShaderInfoLog(FragmentShader, 512, NULL, InfoLog);
-      std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << InfoLog << std::endl;
-   }
-
-   // link shaders
-   int ShaderProgram = glCreateProgram();
-   glAttachShader(ShaderProgram, VertexShader);
-   glAttachShader(ShaderProgram, FragmentShader);
-   glLinkProgram(ShaderProgram);
-   // check for linking errors
-   glGetProgramiv(ShaderProgram, GL_LINK_STATUS, &Success);
-   if (!Success) {
-      glGetProgramInfoLog(ShaderProgram, 512, NULL, InfoLog);
-      std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << InfoLog << std::endl;
-   }
-   glDeleteShader(VertexShader);
-   glDeleteShader(FragmentShader);
+   shader DefaultShader = BuildShader("../shaders/default.vs", "../shaders/default.fs");
 
    // set up vertex data (and buffer(s)) and configure vertex attributes
    // ------------------------------------------------------------------
@@ -169,6 +121,8 @@ int main(int argc, char * argv[]) {
 
          ImGui::Text("This is a test");
 
+         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
          ImGui::End();
       }
 
@@ -180,7 +134,7 @@ int main(int argc, char * argv[]) {
 
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-      glUseProgram(ShaderProgram);
+      UseShader(DefaultShader);
       glBindVertexArray(VAO);
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 

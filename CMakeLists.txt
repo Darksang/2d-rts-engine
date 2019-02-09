@@ -10,6 +10,8 @@ set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 include_directories(${INCLUDE_DIR})
 
 set(SRC ${SRC_DIR}/main.cpp
+        ${SRC_DIR}/shader.cpp
+        ${SRC_DIR}/shader.h
         ${SRC_DIR}/imgui/imconfig.h
         ${SRC_DIR}/imgui/imgui_demo.cpp
         ${SRC_DIR}/imgui/imgui_draw.cpp

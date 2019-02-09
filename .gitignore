@@ -1,6 +1,7 @@
 # Project Specific
 /build
 
+/.vscode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
