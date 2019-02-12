@@ -12,6 +12,7 @@ include_directories(${INCLUDE_DIR})
 set(SRC ${SRC_DIR}/main.cpp
         ${SRC_DIR}/shader.cpp
         ${SRC_DIR}/shader.h
+
         ${SRC_DIR}/imgui/imconfig.h
         ${SRC_DIR}/imgui/imgui_demo.cpp
         ${SRC_DIR}/imgui/imgui_draw.cpp
@@ -25,7 +26,10 @@ set(SRC ${SRC_DIR}/main.cpp
         ${SRC_DIR}/imgui/imgui_impl_glfw.cpp
         ${SRC_DIR}/imgui/imgui_impl_glfw.h
         ${SRC_DIR}/imgui/imgui_impl_opengl3.cpp
-        ${SRC_DIR}/imgui/imgui_impl_opengl3.h)
+        ${SRC_DIR}/imgui/imgui_impl_opengl3.h
+        
+        ${INCLUDE_DIR}/stb_image.h
+        ${SRC_DIR}/stb_image.cpp)
 
 # Executable Definition
 add_executable(${PROJECT_NAME} ${SRC})

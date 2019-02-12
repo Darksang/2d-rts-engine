@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include "shader.h"
+#include "stb_image.h"
 
 const unsigned int SCREEN_WIDTH = 800;
 const unsigned int SCREEN_HEIGHT = 600;
@@ -50,15 +51,17 @@ int main(int argc, char * argv[]) {
        return -1;
    }
 
-   shader DefaultShader = BuildShader("../shaders/default.vs", "../shaders/default.fs");
+   // TODO: Path has to go backwards two times in Windows, once in OSX, fix it
+   shader DefaultShader = BuildShader("../../shaders/default.vs", "../../shaders/default.fs");
 
    // set up vertex data (and buffer(s)) and configure vertex attributes
    // ------------------------------------------------------------------
    float Vertices[] = {
-      0.5f,  0.5f, 0.0f,  // top right
-      0.5f, -0.5f, 0.0f,  // bottom right
-      -0.5f, -0.5f, 0.0f,  // bottom left
-      -0.5f,  0.5f, 0.0f   // top left 
+      // positions         // colors           // texture coords
+      0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+      0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+      -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+      -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
    };
 
    unsigned int Indices[] = {  // note that we start from 0!
@@ -79,17 +82,37 @@ int main(int argc, char * argv[]) {
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
 
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+   // Position attribute
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
    glEnableVertexAttribArray(0);
+   // Color attribute
+   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+   glEnableVertexAttribArray(1);
+   // Texture attribute
+   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+   glEnableVertexAttribArray(2);
 
-   // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   // Load and create a texture
+   unsigned int Texture;
+   glGenTextures(1, &Texture);
+   glBindTexture(GL_TEXTURE_2D, Texture);
 
-   // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-   // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-   glBindVertexArray(0); 
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+   int Width, Height, Channels;
+   unsigned char * Data = stbi_load("container.jpg", &Width, &Height, &Channels, 0);
+
+   if (Data) {
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, Data);
+      glGenerateMipmap(GL_TEXTURE_2D);
+   } else {
+      std::cout << "Failed to load image" << std::endl;
+   }
+
+   stbi_image_free(Data);
 
    // IMGUI
    IMGUI_CHECKVERSION();
@@ -132,11 +155,13 @@ int main(int argc, char * argv[]) {
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT);
 
-      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+      glBindTexture(GL_TEXTURE_2D, Texture);
 
       UseShader(DefaultShader);
       glBindVertexArray(VAO);
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
       // Swap screen buffers (front and back buffers)
       glfwSwapBuffers(Window);
