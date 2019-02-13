@@ -105,6 +105,7 @@ int main(int argc, char * argv[]) {
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+   // This image it's in Resources folder, but it must be copied where the exe is for the time being
    int Width, Height, Channels;
    unsigned char * Data = stbi_load("container.jpg", &Width, &Height, &Channels, 0);
 
@@ -160,11 +161,18 @@ int main(int argc, char * argv[]) {
 
       glBindTexture(GL_TEXTURE_2D, Texture);
 
-      glm::mat4 Transform = glm::mat4(1.0f); // Initialize to identity matrix
-      Transform = glm::translate(Transform, glm::vec3(0.5f, -0.5f, 0.0f));
-      Transform = glm::rotate(Transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-
       UseShader(DefaultShader);
+
+      glm::mat4 Model = glm::mat4(1.0f);
+      glm::mat4 View = glm::mat4(1.0f);
+      glm::mat4 Projection = glm::mat4(1.0f);
+      Model = glm::rotate(Model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+      View = glm::translate(View, glm::vec3(0.0f, 0.0f, -3.0f));
+      Projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
+
+      SetMat4(DefaultShader, "Model", Model);
+      SetMat4(DefaultShader, "View", View);
+      SetMat4(DefaultShader, "Projection", Projection);
 
       glBindVertexArray(VAO);
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -192,7 +200,7 @@ void FramebufferSizeCallback(GLFWwindow * Window, int Width, int Height) {
 
 void KeyCallback(GLFWwindow * Window, int Key, int Scancode, int Action, int Mods) {
    if (Key == GLFW_KEY_ESCAPE && Action == GLFW_PRESS) {
-      printf("Escape key pressed\n");
+      glfwSetWindowShouldClose(Window, true);
    } else if (Key == GLFW_KEY_Q && Action == GLFW_PRESS) {
       printf("Q key pressed\n");
    } else if (Key == GLFW_KEY_W && Action == GLFW_PRESS) {
