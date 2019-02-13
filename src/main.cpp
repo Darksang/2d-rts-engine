@@ -1,6 +1,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
@@ -157,7 +160,12 @@ int main(int argc, char * argv[]) {
 
       glBindTexture(GL_TEXTURE_2D, Texture);
 
+      glm::mat4 Transform = glm::mat4(1.0f); // Initialize to identity matrix
+      Transform = glm::translate(Transform, glm::vec3(0.5f, -0.5f, 0.0f));
+      Transform = glm::rotate(Transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
       UseShader(DefaultShader);
+
       glBindVertexArray(VAO);
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
