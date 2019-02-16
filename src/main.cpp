@@ -258,6 +258,16 @@ int main(int argc, char * argv[]) {
       // Swap screen buffers (front and back buffers)
       glfwSwapBuffers(Window);
       glfwPollEvents();
+
+      // NOTE: Fix for initial black screen. GLFW bug on OSX Mojave.
+      static bool FixOSX = false;
+
+      if (!FixOSX) {
+         int x, y;
+         glfwGetWindowPos(Window, &x, &y);
+         glfwSetWindowPos(Window, ++x, y);
+         FixOSX = true;
+      }
    }
 
    // Clear allocated resources
