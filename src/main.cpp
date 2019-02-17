@@ -253,7 +253,7 @@ int main(int argc, char * argv[]) {
       glfwPollEvents();
 
       // NOTE: Fix for initial black screen. GLFW bug on OSX Mojave.
-      #ifdef _APPLE_
+      #ifdef __APPLE__
       static bool FixOSX = false;
 
       if (!FixOSX) {
