@@ -12,6 +12,8 @@ include_directories(${INCLUDE_DIR})
 set(SRC ${SRC_DIR}/main.cpp
         ${SRC_DIR}/shader.cpp
         ${SRC_DIR}/shader.h
+        ${SRC_DIR}/camera.cpp
+        ${SRC_DIR}/camera.h
 
         ${SRC_DIR}/imgui/imconfig.h
         ${SRC_DIR}/imgui/imgui_demo.cpp

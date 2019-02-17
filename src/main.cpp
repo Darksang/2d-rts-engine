@@ -12,6 +12,8 @@
 #include <iostream>
 
 #include "shader.h"
+#include "camera.h"
+
 #include "stb_image.h"
 
 const unsigned int SCREEN_WIDTH = 800;
@@ -20,26 +22,17 @@ const unsigned int SCREEN_HEIGHT = 600;
 void FramebufferSizeCallback(GLFWwindow * Window, int Width, int Height);
 void KeyCallback(GLFWwindow * Window, int Key, int Scancode, int Action, int Mods);
 void MouseCallback(GLFWwindow * Window, double PositionX, double PositionY);
-void ScrollCallback(GLFWwindow * Window, double OffsetX, double OffsetY);
 void ProcessInput(GLFWwindow * Window);
-
-// Camera variables
-glm::vec3 CameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 CameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 CameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 // Frame time variables
 float DeltaTime = 0.0f;
 float LastFrameTime = 0.0f;
 
-// Camera mouse movement variables
+// Camera
+camera MainCamera;
 bool FirstMouse = true;
 float LastMousePositionX = (float)SCREEN_WIDTH / 2.0f;
 float LastMousePositionY = (float)SCREEN_HEIGHT / 2.0f;
-float Yaw = -90.0f;
-float Pitch = 0.0f;
-
-float FOV = 45.0f;
 
 int main(int argc, char * argv[]) {
    // Initialize GLFW
@@ -68,7 +61,6 @@ int main(int argc, char * argv[]) {
    // Register callbacks
    glfwSetFramebufferSizeCallback(Window, FramebufferSizeCallback);
    glfwSetCursorPosCallback(Window, MouseCallback);
-   glfwSetScrollCallback(Window, ScrollCallback);
 
    glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -79,6 +71,9 @@ int main(int argc, char * argv[]) {
    }
 
    glEnable(GL_DEPTH_TEST);
+
+   // Initialize camera
+   MainCamera = CreatePerspectiveCamera(glm::vec3(0.0f, 0.0f, 3.0f), 60, 0.3, 1000);
 
    // TODO: Path has to go backwards two times in Windows, once in OSX, fix it
    shader DefaultShader = BuildShader("resources/shaders/default.vs", "resources/shaders/default.fs");
@@ -234,12 +229,10 @@ int main(int argc, char * argv[]) {
 
       UseShader(DefaultShader);
 
-      glm::mat4 Projection = glm::perspective(glm::radians(FOV), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
+      glm::mat4 Projection = glm::perspective(glm::radians((float)MainCamera.FieldOfView), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, MainCamera.NearClippingPlane, MainCamera.FarClippingPlane);
       SetMat4(DefaultShader, "Projection", Projection);
 
-      glm::mat4 View = glm::mat4(1.0f);
-      View = glm::lookAt(CameraPos, CameraPos + CameraFront, CameraUp);
-
+      glm::mat4 View = GetViewMatrix(MainCamera);
       SetMat4(DefaultShader, "View", View);
 
       glBindVertexArray(VAO);
@@ -260,6 +253,7 @@ int main(int argc, char * argv[]) {
       glfwPollEvents();
 
       // NOTE: Fix for initial black screen. GLFW bug on OSX Mojave.
+      #ifdef _APPLE_
       static bool FixOSX = false;
 
       if (!FixOSX) {
@@ -268,6 +262,7 @@ int main(int argc, char * argv[]) {
          glfwSetWindowPos(Window, ++x, y);
          FixOSX = true;
       }
+      #endif
    }
 
    // Clear allocated resources
@@ -297,73 +292,23 @@ void MouseCallback(GLFWwindow * Window, double PositionX, double PositionY) {
    LastMousePositionX = PositionX;
    LastMousePositionY = PositionY;
 
-   float Sensitivity = 0.1f;
-   OffsetX *= Sensitivity;
-   OffsetY *= Sensitivity;
-
-   Yaw += OffsetX;
-   Pitch += OffsetY;
-
-   if (Pitch > 89.0f)
-      Pitch = 89.0f;
-   if (Pitch < -89.0f)
-      Pitch = -89.0f;
-
-   glm::vec3 Front;
-   Front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-   Front.y = sin(glm::radians(Pitch));
-   Front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-   CameraFront = glm::normalize(Front);
-}
-
-void ScrollCallback(GLFWwindow * Window, double OffsetX, double OffsetY) {
-   if (FOV >= 1.0f && FOV <= 60.0f)
-      FOV -= OffsetY;
-   
-   if (FOV <= 1.0f)
-      FOV = 1.0f;
-
-   if (FOV >= 60.0f)
-      FOV = 60.0f;
+   CameraProcessMouseMovement(&MainCamera, OffsetX, OffsetY);
 }
 
 void ProcessInput(GLFWwindow * Window) {
    if (glfwGetKey(Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
       glfwSetWindowShouldClose(Window, true);
 
-   float CameraSpeed = 2.5f * DeltaTime;
+   if (glfwGetKey(Window, GLFW_KEY_H) == GLFW_PRESS) {
+      std::cout << "Position -> X: " << MainCamera.Position.x << " Y: " << MainCamera.Position.y << " Z: " << MainCamera.Position.z << std::endl;
+   }
 
    if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS)
-      CameraPos += CameraSpeed * CameraFront;
+      CameraProcessKeyboard(&MainCamera, FORWARD, DeltaTime);
    if (glfwGetKey(Window, GLFW_KEY_S) == GLFW_PRESS)
-      CameraPos -= CameraSpeed * CameraFront;
+      CameraProcessKeyboard(&MainCamera, BACKWARDS, DeltaTime);
    if (glfwGetKey(Window, GLFW_KEY_A) == GLFW_PRESS)
-      CameraPos -= glm::normalize(glm::cross(CameraFront, CameraUp)) * CameraSpeed;
+      CameraProcessKeyboard(&MainCamera, LEFT, DeltaTime);
    if (glfwGetKey(Window, GLFW_KEY_D) == GLFW_PRESS)
-      CameraPos += glm::normalize(glm::cross(CameraFront, CameraUp)) * CameraSpeed;
+      CameraProcessKeyboard(&MainCamera, RIGHT, DeltaTime);
 }
-
-/*
-void KeyCallback(GLFWwindow * Window, int Key, int Scancode, int Action, int Mods) {
-   float CameraSpeed = 2.5f * DeltaTime;
-
-   if (Key == GLFW_KEY_ESCAPE && Action == GLFW_PRESS) {
-      glfwSetWindowShouldClose(Window, true);
-   } else if (Key == GLFW_KEY_Q && Action == GLFW_PRESS) {
-      printf("Q key pressed\n");
-   } else if (Key == GLFW_KEY_W && Action == GLFW_PRESS) {
-      CameraPos += CameraSpeed * CameraFront;
-   } else if (Key == GLFW_KEY_E && Action == GLFW_PRESS) {
-      printf("E key pressed\n");
-   } else if (Key == GLFW_KEY_A && Action == GLFW_PRESS) {
-      CameraPos -= glm::normalize(glm::cross(CameraFront, CameraUp)) * CameraSpeed;
-   } else if (Key == GLFW_KEY_S && Action == GLFW_PRESS) {
-      CameraPos -= CameraSpeed * CameraFront;
-   } else if (Key == GLFW_KEY_D && Action == GLFW_PRESS) {
-      CameraPos += glm::normalize(glm::cross(CameraFront, CameraUp)) * CameraSpeed;
-   } else if (Key == GLFW_KEY_F && Action == GLFW_PRESS) {
-      printf("F key pressed\n");
-   } else if (Key == GLFW_KEY_SPACE && Action == GLFW_PRESS) {
-      printf("Space key pressed\n");
-   }
-} */
