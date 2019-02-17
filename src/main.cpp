@@ -81,7 +81,7 @@ int main(int argc, char * argv[]) {
    glEnable(GL_DEPTH_TEST);
 
    // TODO: Path has to go backwards two times in Windows, once in OSX, fix it
-   shader DefaultShader = BuildShader("../../shaders/default.vs", "../../shaders/default.fs");
+   shader DefaultShader = BuildShader("resources/shaders/default.vs", "resources/shaders/default.fs");
 
    // set up vertex data (and buffer(s)) and configure vertex attributes
    // ------------------------------------------------------------------
@@ -170,7 +170,7 @@ int main(int argc, char * argv[]) {
 
    // NOTE: This image it's in Resources folder, but it must be copied where the exe is for the time being
    int Width, Height, Channels;
-   unsigned char * Data = stbi_load("container.jpg", &Width, &Height, &Channels, 0);
+   unsigned char * Data = stbi_load("resources/textures/container.jpg", &Width, &Height, &Channels, 0);
 
    if (Data) {
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, Data);
