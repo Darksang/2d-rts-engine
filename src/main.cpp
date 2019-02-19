@@ -29,7 +29,7 @@ float DeltaTime = 0.0f;
 float LastFrameTime = 0.0f;
 
 // Camera
-camera MainCamera;
+Camera MainCamera(glm::vec3(0.0f, 0.0f, 3.0f), 60, 0.3f, 1000.0f);
 bool FirstMouse = true;
 float LastMousePositionX = (float)SCREEN_WIDTH / 2.0f;
 float LastMousePositionY = (float)SCREEN_HEIGHT / 2.0f;
@@ -72,11 +72,7 @@ int main(int argc, char * argv[]) {
 
    glEnable(GL_DEPTH_TEST);
 
-   // Initialize camera
-   MainCamera = CreatePerspectiveCamera(glm::vec3(0.0f, 0.0f, 3.0f), 60, 0.3, 1000);
-
-   // TODO: Path has to go backwards two times in Windows, once in OSX, fix it
-   shader DefaultShader = BuildShader("resources/shaders/default.vs", "resources/shaders/default.fs");
+   Shader DefaultShader("resources/shaders/default.vs", "resources/shaders/default.fs");
 
    // set up vertex data (and buffer(s)) and configure vertex attributes
    // ------------------------------------------------------------------
@@ -188,8 +184,8 @@ int main(int argc, char * argv[]) {
    ImGui_ImplGlfw_InitForOpenGL(Window, true);
    ImGui_ImplOpenGL3_Init(glsl_version);
 
-   UseShader(DefaultShader);
-   SetInt(DefaultShader, "Texture1", 0);
+   DefaultShader.Activate();
+   DefaultShader.SetInt("Texture1", 0);
 
    // Game loop
    while (!glfwWindowShouldClose(Window)) {
@@ -227,13 +223,13 @@ int main(int argc, char * argv[]) {
 
       glBindTexture(GL_TEXTURE_2D, Texture);
 
-      UseShader(DefaultShader);
+      DefaultShader.Activate();
 
       glm::mat4 Projection = glm::perspective(glm::radians((float)MainCamera.FieldOfView), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, MainCamera.NearClippingPlane, MainCamera.FarClippingPlane);
-      SetMat4(DefaultShader, "Projection", Projection);
+      DefaultShader.SetMat4("Projection", Projection);
 
-      glm::mat4 View = GetViewMatrix(MainCamera);
-      SetMat4(DefaultShader, "View", View);
+      glm::mat4 View = MainCamera.GetViewMatrix();
+      DefaultShader.SetMat4("View", View);
 
       glBindVertexArray(VAO);
       for (unsigned int i = 0; i < 10; i++) {
@@ -241,7 +237,7 @@ int main(int argc, char * argv[]) {
          Model = glm::translate(Model, CubePositions[i]);
          float angle = 20.0f * i;
          Model = glm::rotate(Model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-         SetMat4(DefaultShader, "Model", Model);
+         DefaultShader.SetMat4("Model", Model);
 
          glDrawArrays(GL_TRIANGLES, 0, 36);
       }
@@ -292,23 +288,19 @@ void MouseCallback(GLFWwindow * Window, double PositionX, double PositionY) {
    LastMousePositionX = PositionX;
    LastMousePositionY = PositionY;
 
-   CameraProcessMouseMovement(&MainCamera, OffsetX, OffsetY);
+   MainCamera.ProcessMouseMovement(OffsetX, OffsetY);
 }
 
 void ProcessInput(GLFWwindow * Window) {
    if (glfwGetKey(Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
       glfwSetWindowShouldClose(Window, true);
 
-   if (glfwGetKey(Window, GLFW_KEY_H) == GLFW_PRESS) {
-      std::cout << "Position -> X: " << MainCamera.Position.x << " Y: " << MainCamera.Position.y << " Z: " << MainCamera.Position.z << std::endl;
-   }
-
    if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS)
-      CameraProcessKeyboard(&MainCamera, FORWARD, DeltaTime);
+      MainCamera.ProcessKeyboard(FORWARD, DeltaTime);
    if (glfwGetKey(Window, GLFW_KEY_S) == GLFW_PRESS)
-      CameraProcessKeyboard(&MainCamera, BACKWARDS, DeltaTime);
+      MainCamera.ProcessKeyboard(BACKWARDS, DeltaTime);
    if (glfwGetKey(Window, GLFW_KEY_A) == GLFW_PRESS)
-      CameraProcessKeyboard(&MainCamera, LEFT, DeltaTime);
+      MainCamera.ProcessKeyboard(LEFT, DeltaTime);
    if (glfwGetKey(Window, GLFW_KEY_D) == GLFW_PRESS)
-      CameraProcessKeyboard(&MainCamera, RIGHT, DeltaTime);
+      MainCamera.ProcessKeyboard(RIGHT, DeltaTime);
 }

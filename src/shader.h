@@ -5,33 +5,33 @@
 
 #include <glm/glm.hpp>
 
-#include <string>
+#include <string.h>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 
-struct shader {
-    unsigned int ID;  
+class Shader {
+    public:
+        unsigned int ID;
+
+        Shader(const GLchar * VertexPath, const GLchar * FragmentPath);
+
+        void Activate();
+        void SetBool(const std::string & Name, bool Value) const;
+        void SetInt(const std::string & Name, int Value) const;
+        void SetFloat(const std::string & Name, float Value) const;
+        void SetVec2(const std::string & Name, const glm::vec2 & Vector) const;
+        void SetVec2(const std::string & Name, float x, float y) const;
+        void SetVec3(const std::string & Name, const glm::vec3 & Vector) const;
+        void SetVec3(const std::string & Name, float x, float y, float z) const;
+        void SetVec4(const std::string & Name, const glm::vec4 & Vector) const;
+        void SetVec4(const std::string & Name, float x, float y, float z, float w) const;
+        void SetMat2(const std::string & Name, const glm::mat2 & Matrix) const;
+        void SetMat3(const std::string & Name, const glm::mat3 & Matrix) const;
+        void SetMat4(const std::string & Name, const glm::mat4 & Matrix) const;
+
+    private:
+        void CheckShaderErrors(GLuint Shader, const std::string Type);
 };
-
-shader BuildShader(const GLchar * VertexPath, const GLchar * FragmentPath);
-
-// Uniform functions
-void UseShader(shader Shader);
-void SetBool(shader Shader, const std::string & Name, bool Value);
-void SetInt(shader Shader, const std::string & Name, int Value);
-void SetFloat(shader Shader, const std::string & Name, float Value);
-void SetVec2(shader Shader, const std::string & Name, const glm::vec2 & Vector);
-void SetVec2(shader Shader, const std::string & Name, float x, float y);
-void SetVec3(shader Shader, const std::string & Name, const glm::vec3 & Vector);
-void SetVec3(shader Shader, const std::string & Name, float x, float y, float z);
-void SetVec4(shader Shader, const std::string & Name, const glm::vec4 & Vector);
-void SetVec4(shader Shader, const std::string & Name, float x, float y, float z, float w);
-void SetMat2(shader Shader, const std::string & Name, const glm::mat2 & Matrix);
-void SetMat3(shader Shader, const std::string & Name, const glm::mat3 & Matrix);
-void SetMat4(shader Shader, const std::string & Name, const glm::mat4 & Matrix);
-
-// Check compile and link errors
-void CheckShaderErrors(GLuint Shader, std::string Type);
 
 #endif
