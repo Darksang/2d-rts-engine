@@ -14,6 +14,8 @@ set(SRC ${SRC_DIR}/main.cpp
         ${SRC_DIR}/shader.h
         ${SRC_DIR}/camera.cpp
         ${SRC_DIR}/camera.h
+        ${SRC_DIR}/window.cpp
+        ${SRC_DIR}/window.h
 
         ${SRC_DIR}/imgui/imconfig.h
         ${SRC_DIR}/imgui/imgui_demo.cpp

@@ -11,18 +11,14 @@
 
 #include <iostream>
 
+#include "window.h"
 #include "shader.h"
 #include "camera.h"
 
 #include "stb_image.h"
 
-const unsigned int SCREEN_WIDTH = 800;
-const unsigned int SCREEN_HEIGHT = 600;
-
-void FramebufferSizeCallback(GLFWwindow * Window, int Width, int Height);
-void KeyCallback(GLFWwindow * Window, int Key, int Scancode, int Action, int Mods);
-void MouseCallback(GLFWwindow * Window, double PositionX, double PositionY);
-void ProcessInput(GLFWwindow * Window);
+void ProcessKeys(GLFWwindow * Window);
+void CameraMouseMovement(double PositionX, double PositionY);
 
 // Frame time variables
 float DeltaTime = 0.0f;
@@ -31,38 +27,14 @@ float LastFrameTime = 0.0f;
 // Camera
 Camera MainCamera(glm::vec3(0.0f, 0.0f, 3.0f), 60, 0.3f, 1000.0f);
 bool FirstMouse = true;
-float LastMousePositionX = (float)SCREEN_WIDTH / 2.0f;
-float LastMousePositionY = (float)SCREEN_HEIGHT / 2.0f;
+float LastMousePositionX;
+float LastMousePositionY;
 
 int main(int argc, char * argv[]) {
-   // Initialize GLFW
-   glfwInit();
+   Window GameWindow(800, 600, "RTSGame"); 
 
-   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-   glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-
-   #ifdef __APPLE__
-   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-   #endif
-
-   // Create a window
-   GLFWwindow * Window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "RTS Game", 0, 0);
-   if (!Window) {
-      std::cout << "Failed to create GLFW window" << std::endl;
-      glfwTerminate();
-      return -1;
-   }
-
-   // Asign OpenGL context to our window
-   glfwMakeContextCurrent(Window);
-
-   // Register callbacks
-   glfwSetFramebufferSizeCallback(Window, FramebufferSizeCallback);
-   glfwSetCursorPosCallback(Window, MouseCallback);
-
-   glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+   LastMousePositionX = (float)GameWindow.Width / 2.0f;
+   LastMousePositionY = (float)GameWindow.Height / 2.0f;
 
    // Load all OpenGL function pointers
    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -181,21 +153,29 @@ int main(int argc, char * argv[]) {
    ImGui::StyleColorsDark();
 
    const char* glsl_version = "#version 150";
-   ImGui_ImplGlfw_InitForOpenGL(Window, true);
+   ImGui_ImplGlfw_InitForOpenGL(GameWindow.MainWindow, true);
    ImGui_ImplOpenGL3_Init(glsl_version);
 
    DefaultShader.Activate();
    DefaultShader.SetInt("Texture1", 0);
 
+   double MouseX = 0;
+   double MouseY = 0;
+
    // Game loop
-   while (!glfwWindowShouldClose(Window)) {
+   while (!GameWindow.ShouldClose()) {
       // Update delta time
       float CurrentFrameTime = glfwGetTime();
       DeltaTime = CurrentFrameTime - LastFrameTime;
       LastFrameTime = CurrentFrameTime;
 
-      // Process input
-      ProcessInput(Window);
+      // Process input TODO: Rewrite Input handling
+      ProcessKeys(GameWindow.MainWindow);
+      /* if (glfwGetKey(GameWindow.MainWindow, GLFW_KEY_Q) == GLFW_PRESS)
+         std::cout << "Window Width: " << GameWindow.Width << " Window Height: " << GameWindow.Height << std::endl; */
+
+      GameWindow.GetCursorPosition(&MouseX, &MouseY);
+      CameraMouseMovement(MouseX, MouseY);
 
       // IMGUI
       ImGui_ImplOpenGL3_NewFrame();
@@ -225,7 +205,7 @@ int main(int argc, char * argv[]) {
 
       DefaultShader.Activate();
 
-      glm::mat4 Projection = glm::perspective(glm::radians((float)MainCamera.FieldOfView), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, MainCamera.NearClippingPlane, MainCamera.FarClippingPlane);
+      glm::mat4 Projection = glm::perspective(glm::radians((float)MainCamera.FieldOfView), (float)GameWindow.Width / (float)GameWindow.Height, MainCamera.NearClippingPlane, MainCamera.FarClippingPlane);
       DefaultShader.SetMat4("Projection", Projection);
 
       glm::mat4 View = MainCamera.GetViewMatrix();
@@ -245,17 +225,14 @@ int main(int argc, char * argv[]) {
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
       // Swap screen buffers (front and back buffers)
-      glfwSwapBuffers(Window);
-      glfwPollEvents();
+      GameWindow.SwapBuffers();
 
       // NOTE: Fix for initial black screen. GLFW bug on OSX Mojave.
       #ifdef __APPLE__
       static bool FixOSX = false;
 
       if (!FixOSX) {
-         int x, y;
-         glfwGetWindowPos(Window, &x, &y);
-         glfwSetWindowPos(Window, ++x, y);
+         GameWindow.OSXFix();
          FixOSX = true;
       }
       #endif
@@ -265,17 +242,10 @@ int main(int argc, char * argv[]) {
    glDeleteVertexArrays(1, &VAO);
    glDeleteBuffers(1, &VBO);
 
-   glfwTerminate();
-
    return 0;
 }
 
-void FramebufferSizeCallback(GLFWwindow * Window, int Width, int Height) {
-    // Make sure the viewport matches the new window dimensions
-    glViewport(0, 0, Width, Height);
-}
-
-void MouseCallback(GLFWwindow * Window, double PositionX, double PositionY) {
+void CameraMouseMovement(double PositionX, double PositionY) {
    if (FirstMouse) {
       LastMousePositionX = PositionX;
       LastMousePositionY = PositionY;
@@ -291,10 +261,7 @@ void MouseCallback(GLFWwindow * Window, double PositionX, double PositionY) {
    MainCamera.ProcessMouseMovement(OffsetX, OffsetY);
 }
 
-void ProcessInput(GLFWwindow * Window) {
-   if (glfwGetKey(Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-      glfwSetWindowShouldClose(Window, true);
-
+void ProcessKeys(GLFWwindow * Window) {
    if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS)
       MainCamera.ProcessKeyboard(FORWARD, DeltaTime);
    if (glfwGetKey(Window, GLFW_KEY_S) == GLFW_PRESS)
