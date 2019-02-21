@@ -9,15 +9,15 @@
 
 class Window {
     public:
-        GLFWwindow * MainWindow;
-
-        int Width;
-        int Height;
-
-        const char * Name;
-
         Window(int Width, int Height, const char * Name);
         ~Window();
+
+        GLFWwindow * GetWindow();
+        int GetWidth();
+        void SetWidth(int W);
+        int GetHeight();
+        void SetHeight(int H);
+        const char * GetName();
 
         void SwapBuffers();
 
@@ -29,7 +29,21 @@ class Window {
         void OSXFix();
     
     private:
-        static void FramebufferSizeCallback(GLFWwindow * Window, int Width, int Height);
+        GLFWwindow * MainWindow;
+
+        int Width;
+        int Height;
+
+        const char * Name;
+
+        // GLFW Callbacks
+        inline static void FramebufferSizeCallback(GLFWwindow * Win, int Width, int Height) {
+            // Update our Window object Width and Height using the pointer stored
+            Window * WindowPtr = static_cast<Window *>(glfwGetWindowUserPointer(Win));
+            WindowPtr->SetWidth(Width);
+            WindowPtr->SetHeight(Height);
+            glViewport(0, 0, (GLsizei)Width, (GLsizei)Height);
+        }
 };
 
 #endif

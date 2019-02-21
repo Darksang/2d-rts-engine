@@ -17,7 +17,7 @@
 
 #include "stb_image.h"
 
-void ProcessKeys(GLFWwindow * Window);
+void CameraKeyboardMovement(GLFWwindow * Window);
 void CameraMouseMovement(double PositionX, double PositionY);
 
 // Frame time variables
@@ -33,8 +33,8 @@ float LastMousePositionY;
 int main(int argc, char * argv[]) {
    Window GameWindow(800, 600, "RTSGame"); 
 
-   LastMousePositionX = (float)GameWindow.Width / 2.0f;
-   LastMousePositionY = (float)GameWindow.Height / 2.0f;
+   LastMousePositionX = (float)GameWindow.GetWidth() / 2.0f;
+   LastMousePositionY = (float)GameWindow.GetHeight() / 2.0f;
 
    // Load all OpenGL function pointers
    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -153,7 +153,7 @@ int main(int argc, char * argv[]) {
    ImGui::StyleColorsDark();
 
    const char* glsl_version = "#version 150";
-   ImGui_ImplGlfw_InitForOpenGL(GameWindow.MainWindow, true);
+   ImGui_ImplGlfw_InitForOpenGL(GameWindow.GetWindow(), true);
    ImGui_ImplOpenGL3_Init(glsl_version);
 
    DefaultShader.Activate();
@@ -170,10 +170,7 @@ int main(int argc, char * argv[]) {
       LastFrameTime = CurrentFrameTime;
 
       // Process input TODO: Rewrite Input handling
-      ProcessKeys(GameWindow.MainWindow);
-      /* if (glfwGetKey(GameWindow.MainWindow, GLFW_KEY_Q) == GLFW_PRESS)
-         std::cout << "Window Width: " << GameWindow.Width << " Window Height: " << GameWindow.Height << std::endl; */
-
+      CameraKeyboardMovement(GameWindow.GetWindow());
       GameWindow.GetCursorPosition(&MouseX, &MouseY);
       CameraMouseMovement(MouseX, MouseY);
 
@@ -183,9 +180,6 @@ int main(int argc, char * argv[]) {
       ImGui::NewFrame();
 
       {
-         static float f = 0.0f;
-         static int counter = 0;
-
          ImGui::Begin("Hello, World");
 
          ImGui::Text("This is a test");
@@ -205,7 +199,7 @@ int main(int argc, char * argv[]) {
 
       DefaultShader.Activate();
 
-      glm::mat4 Projection = glm::perspective(glm::radians((float)MainCamera.FieldOfView), (float)GameWindow.Width / (float)GameWindow.Height, MainCamera.NearClippingPlane, MainCamera.FarClippingPlane);
+      glm::mat4 Projection = glm::perspective(glm::radians((float)MainCamera.FieldOfView), (float)GameWindow.GetWidth() / (float)GameWindow.GetHeight(), MainCamera.NearClippingPlane, MainCamera.FarClippingPlane);
       DefaultShader.SetMat4("Projection", Projection);
 
       glm::mat4 View = MainCamera.GetViewMatrix();
@@ -261,7 +255,7 @@ void CameraMouseMovement(double PositionX, double PositionY) {
    MainCamera.ProcessMouseMovement(OffsetX, OffsetY);
 }
 
-void ProcessKeys(GLFWwindow * Window) {
+void CameraKeyboardMovement(GLFWwindow * Window) {
    if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS)
       MainCamera.ProcessKeyboard(FORWARD, DeltaTime);
    if (glfwGetKey(Window, GLFW_KEY_S) == GLFW_PRESS)

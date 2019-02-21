@@ -23,8 +23,11 @@ Window::Window(int Width, int Height, const char * Name) {
         glfwTerminate();
     }
 
+    glfwSetWindowUserPointer(MainWindow, this);
+
     glfwMakeContextCurrent(MainWindow);
 
+    // TODO: Allow to change Cursor Input Mode
     glfwSetInputMode(MainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glfwSetFramebufferSizeCallback(MainWindow, FramebufferSizeCallback);
@@ -32,6 +35,30 @@ Window::Window(int Width, int Height, const char * Name) {
 
 Window::~Window() {
     glfwTerminate();
+}
+
+GLFWwindow * Window::GetWindow() {
+    return this->MainWindow;
+}
+
+int Window::GetWidth() {
+    return this->Width;
+}
+
+void Window::SetWidth(int W) {
+    this->Width = W;
+}
+
+int Window::GetHeight() {
+    return this->Height;
+}
+
+void Window::SetHeight(int H) {
+    this->Height = H;
+}
+
+const char * Window::GetName() {
+    return this->Name;
 }
 
 void Window::SwapBuffers() {
@@ -55,9 +82,4 @@ void Window::OSXFix() {
     int x, y;
     glfwGetWindowPos(MainWindow, &x, &y);
     glfwSetWindowPos(MainWindow, ++x, y);
-}
-
-// Callbacks
-void Window::FramebufferSizeCallback(GLFWwindow * Window, int Width, int Height) {
-    glViewport(0, 0, Width, Height);
 }
