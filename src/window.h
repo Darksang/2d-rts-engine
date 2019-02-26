@@ -21,6 +21,7 @@ class Window {
 
         void SwapBuffers();
 
+        void SetCursorMode(int Value);
         void GetCursorPosition(double * X, double * Y);
 
         bool ShouldClose();

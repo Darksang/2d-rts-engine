@@ -29,9 +29,10 @@ Camera MainCamera(glm::vec3(0.0f, 0.0f, 3.0f), 60, 0.3f, 1000.0f);
 bool FirstMouse = true;
 float LastMousePositionX;
 float LastMousePositionY;
+bool AllowFreeMove = true;
 
 int main(int argc, char * argv[]) {
-   Window GameWindow(800, 600, "RTSGame"); 
+   Window GameWindow(1024, 768, "RTSGame"); 
 
    LastMousePositionX = (float)GameWindow.GetWidth() / 2.0f;
    LastMousePositionY = (float)GameWindow.GetHeight() / 2.0f;
@@ -105,6 +106,8 @@ int main(int argc, char * argv[]) {
       glm::vec3(-1.3f, 1.0f, -1.5f)
    };
 
+   glm::vec3 MovingCubePosition(0.0f, 3.6f, -4.0f);
+
    unsigned int VBO, VAO;
    glGenVertexArrays(1, &VAO);
    glGenBuffers(1, &VBO);
@@ -131,7 +134,6 @@ int main(int argc, char * argv[]) {
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-   // NOTE: This image it's in Resources folder, but it must be copied where the exe is for the time being
    int Width, Height, Channels;
    unsigned char * Data = stbi_load("resources/textures/container.jpg", &Width, &Height, &Channels, 0);
 
@@ -140,6 +142,27 @@ int main(int argc, char * argv[]) {
       glGenerateMipmap(GL_TEXTURE_2D);
    } else {
       std::cout << "Failed to load image" << std::endl;
+   }
+
+   stbi_image_free(Data);
+
+   // Load another texture
+   unsigned int MetalTexture;
+   glGenTextures(1, &MetalTexture);
+   glBindTexture(GL_TEXTURE_2D, MetalTexture);
+
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+   Data = stbi_load("resources/textures/metal.jpg", &Width, &Height, &Channels, 0);
+
+   if (Data) {
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, Data);
+      glGenerateMipmap(GL_TEXTURE_2D);
+   } else {
+      std::cout << "Failed to load metal.jpg" << std::endl;
    }
 
    stbi_image_free(Data);
@@ -169,10 +192,26 @@ int main(int argc, char * argv[]) {
       DeltaTime = CurrentFrameTime - LastFrameTime;
       LastFrameTime = CurrentFrameTime;
 
+      // Exit
+      if (glfwGetKey(GameWindow.GetWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
+         GameWindow.Close();
+
+      // Toggle free moving
+      if (glfwGetKey(GameWindow.GetWindow(), GLFW_KEY_F) == GLFW_PRESS) {
+         AllowFreeMove = !AllowFreeMove;
+
+         if (AllowFreeMove)
+            GameWindow.SetCursorMode(GLFW_CURSOR_DISABLED);
+         else
+            GameWindow.SetCursorMode(GLFW_CURSOR_NORMAL);
+      }
+
       // Process input TODO: Rewrite Input handling
-      CameraKeyboardMovement(GameWindow.GetWindow());
-      GameWindow.GetCursorPosition(&MouseX, &MouseY);
-      CameraMouseMovement(MouseX, MouseY);
+      if (AllowFreeMove) {
+         CameraKeyboardMovement(GameWindow.GetWindow());
+         GameWindow.GetCursorPosition(&MouseX, &MouseY);
+         CameraMouseMovement(MouseX, MouseY);
+      }
 
       // IMGUI
       ImGui_ImplOpenGL3_NewFrame();
@@ -189,12 +228,21 @@ int main(int argc, char * argv[]) {
          ImGui::End();
       }
 
+      {
+         ImGui::Begin("Cube Position");
+         ImGui::InputFloat("X", &MovingCubePosition.x);
+         ImGui::InputFloat("Y", &MovingCubePosition.y);
+         ImGui::InputFloat("Z", &MovingCubePosition.z);
+         ImGui::End();
+      }
+
       ImGui::Render();
 
       // Render
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+      // Render 10 wooden cubes
       glBindTexture(GL_TEXTURE_2D, Texture);
 
       DefaultShader.Activate();
@@ -215,6 +263,21 @@ int main(int argc, char * argv[]) {
 
          glDrawArrays(GL_TRIANGLES, 0, 36);
       }
+
+      // Render 1 Metal Cube
+      glBindTexture(GL_TEXTURE_2D, MetalTexture);
+
+      DefaultShader.Activate();
+      DefaultShader.SetMat4("Projection", Projection);
+      DefaultShader.SetMat4("View", View);
+
+      glBindVertexArray(VAO);
+
+      glm::mat4 MetalModel = glm::mat4(1.0f);
+      MetalModel = glm::translate(MetalModel, MovingCubePosition);
+      DefaultShader.SetMat4("Model", MetalModel);
+
+      glDrawArrays(GL_TRIANGLES, 0, 36);
 
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

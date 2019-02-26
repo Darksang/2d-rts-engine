@@ -27,7 +27,6 @@ Window::Window(int Width, int Height, const char * Name) {
 
     glfwMakeContextCurrent(MainWindow);
 
-    // TODO: Allow to change Cursor Input Mode
     glfwSetInputMode(MainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glfwSetFramebufferSizeCallback(MainWindow, FramebufferSizeCallback);
@@ -64,6 +63,10 @@ const char * Window::GetName() {
 void Window::SwapBuffers() {
     glfwSwapBuffers(MainWindow);
     glfwPollEvents();
+}
+
+void Window::SetCursorMode(int Value) {
+    glfwSetInputMode(this->MainWindow, GLFW_CURSOR, Value);
 }
 
 void Window::GetCursorPosition(double * X, double * Y) {
