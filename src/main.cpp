@@ -5,9 +5,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <imgui/imgui.h>
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengl3.h>
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 
 #include <iostream>
 
@@ -17,25 +17,25 @@
 
 #include "stb_image.h"
 
-void CameraKeyboardMovement(GLFWwindow * Window);
-void CameraMouseMovement(double PositionX, double PositionY);
+//void CameraKeyboardMovement(GLFWwindow * Window);
+//void CameraMouseMovement(double PositionX, double PositionY);
 
 // Frame time variables
 float DeltaTime = 0.0f;
 float LastFrameTime = 0.0f;
 
-// Camera
+/* Camera
 Camera MainCamera(glm::vec3(0.0f, 0.0f, 3.0f), 60, 0.3f, 1000.0f);
 bool FirstMouse = true;
 float LastMousePositionX;
 float LastMousePositionY;
-bool AllowFreeMove = true;
+bool AllowFreeMove = true; */
 
 int main(int argc, char * argv[]) {
    Window GameWindow(1024, 768, "RTSGame"); 
 
-   LastMousePositionX = (float)GameWindow.GetWidth() / 2.0f;
-   LastMousePositionY = (float)GameWindow.GetHeight() / 2.0f;
+   //LastMousePositionX = (float)GameWindow.GetWidth() / 2.0f;
+   //LastMousePositionY = (float)GameWindow.GetHeight() / 2.0f;
 
    // Load all OpenGL function pointers
    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -43,11 +43,11 @@ int main(int argc, char * argv[]) {
        return -1;
    }
 
-   glEnable(GL_DEPTH_TEST);
+   //glEnable(GL_DEPTH_TEST);
 
-   Shader DefaultShader("resources/shaders/default.vs", "resources/shaders/default.fs");
+   //Shader DefaultShader("resources/shaders/default.vs", "resources/shaders/default.fs");
 
-   // set up vertex data (and buffer(s)) and configure vertex attributes
+   /* set up vertex data (and buffer(s)) and configure vertex attributes
    // ------------------------------------------------------------------
    float Vertices[] = {
       -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -165,7 +165,7 @@ int main(int argc, char * argv[]) {
       std::cout << "Failed to load metal.jpg" << std::endl;
    }
 
-   stbi_image_free(Data);
+   stbi_image_free(Data); */
 
    // IMGUI
    IMGUI_CHECKVERSION();
@@ -179,11 +179,11 @@ int main(int argc, char * argv[]) {
    ImGui_ImplGlfw_InitForOpenGL(GameWindow.GetWindow(), true);
    ImGui_ImplOpenGL3_Init(glsl_version);
 
-   DefaultShader.Activate();
-   DefaultShader.SetInt("Texture1", 0);
+   //DefaultShader.Activate();
+   //DefaultShader.SetInt("Texture1", 0);
 
-   double MouseX = 0;
-   double MouseY = 0;
+   //double MouseX = 0;
+   //double MouseY = 0;
 
    // Game loop
    while (!GameWindow.ShouldClose()) {
@@ -196,7 +196,7 @@ int main(int argc, char * argv[]) {
       if (glfwGetKey(GameWindow.GetWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
          GameWindow.Close();
 
-      // Toggle free moving
+      /* Toggle free moving
       if (glfwGetKey(GameWindow.GetWindow(), GLFW_KEY_F) == GLFW_PRESS) {
          AllowFreeMove = !AllowFreeMove;
 
@@ -204,14 +204,14 @@ int main(int argc, char * argv[]) {
             GameWindow.SetCursorMode(GLFW_CURSOR_DISABLED);
          else
             GameWindow.SetCursorMode(GLFW_CURSOR_NORMAL);
-      }
+      } */
 
-      // Process input TODO: Rewrite Input handling
+      /* Process input TODO: Rewrite Input handling
       if (AllowFreeMove) {
          CameraKeyboardMovement(GameWindow.GetWindow());
          GameWindow.GetCursorPosition(&MouseX, &MouseY);
          CameraMouseMovement(MouseX, MouseY);
-      }
+      } */
 
       // IMGUI
       ImGui_ImplOpenGL3_NewFrame();
@@ -228,13 +228,13 @@ int main(int argc, char * argv[]) {
          ImGui::End();
       }
 
-      {
+      /*{
          ImGui::Begin("Cube Position");
          ImGui::InputFloat("X", &MovingCubePosition.x);
          ImGui::InputFloat("Y", &MovingCubePosition.y);
          ImGui::InputFloat("Z", &MovingCubePosition.z);
          ImGui::End();
-      }
+      } */
 
       ImGui::Render();
 
@@ -242,7 +242,7 @@ int main(int argc, char * argv[]) {
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      // Render 10 wooden cubes
+      /* Render 10 wooden cubes
       glBindTexture(GL_TEXTURE_2D, Texture);
 
       DefaultShader.Activate();
@@ -277,7 +277,7 @@ int main(int argc, char * argv[]) {
       MetalModel = glm::translate(MetalModel, MovingCubePosition);
       DefaultShader.SetMat4("Model", MetalModel);
 
-      glDrawArrays(GL_TRIANGLES, 0, 36);
+      glDrawArrays(GL_TRIANGLES, 0, 36); */
 
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -296,13 +296,16 @@ int main(int argc, char * argv[]) {
    }
 
    // Clear allocated resources
-   glDeleteVertexArrays(1, &VAO);
-   glDeleteBuffers(1, &VBO);
+   ImGui_ImplOpenGL3_Shutdown();
+   ImGui_ImplGlfw_Shutdown();
+   ImGui::DestroyContext();
+   //glDeleteVertexArrays(1, &VAO);
+   //glDeleteBuffers(1, &VBO);
 
    return 0;
 }
 
-void CameraMouseMovement(double PositionX, double PositionY) {
+/*void CameraMouseMovement(double PositionX, double PositionY) {
    if (FirstMouse) {
       LastMousePositionX = PositionX;
       LastMousePositionY = PositionY;
@@ -327,4 +330,4 @@ void CameraKeyboardMovement(GLFWwindow * Window) {
       MainCamera.ProcessKeyboard(LEFT, DeltaTime);
    if (glfwGetKey(Window, GLFW_KEY_D) == GLFW_PRESS)
       MainCamera.ProcessKeyboard(RIGHT, DeltaTime);
-}
+} */

@@ -10,28 +10,31 @@ set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 include_directories(${INCLUDE_DIR})
 
 set(SRC ${SRC_DIR}/main.cpp
-        ${SRC_DIR}/shader.cpp
-        ${SRC_DIR}/shader.h
-        ${SRC_DIR}/camera.cpp
-        ${SRC_DIR}/camera.h
-        ${SRC_DIR}/window.cpp
-        ${SRC_DIR}/window.h
 
-        ${SRC_DIR}/imgui/imconfig.h
+        ${INCLUDE_DIR}/shader.h
+        ${SRC_DIR}/shader.cpp
+        ${INCLUDE_DIR}/camera.h
+        ${SRC_DIR}/camera.cpp
+        ${INCLUDE_DIR}/window.h
+        ${SRC_DIR}/window.cpp
+
+        # Dear ImGui Files
+        ${INCLUDE_DIR}/imgui/imconfig.h
         ${SRC_DIR}/imgui/imgui_demo.cpp
         ${SRC_DIR}/imgui/imgui_draw.cpp
-        ${SRC_DIR}/imgui/imgui_internal.h
+        ${INCLUDE_DIR}/imgui/imgui_internal.h
         ${SRC_DIR}/imgui/imgui_widgets.cpp
         ${SRC_DIR}/imgui/imgui.cpp
-        ${SRC_DIR}/imgui/imgui.h
-        ${SRC_DIR}/imgui/imstb_rectpack.h
-        ${SRC_DIR}/imgui/imstb_textedit.h
-        ${SRC_DIR}/imgui/imstb_truetype.h
+        ${INCLUDE_DIR}/imgui/imgui.h
+        ${INCLUDE_DIR}/imgui/imstb_rectpack.h
+        ${INCLUDE_DIR}/imgui/imstb_textedit.h
+        ${INCLUDE_DIR}/imgui/imstb_truetype.h
         ${SRC_DIR}/imgui/imgui_impl_glfw.cpp
-        ${SRC_DIR}/imgui/imgui_impl_glfw.h
+        ${INCLUDE_DIR}/imgui/imgui_impl_glfw.h
         ${SRC_DIR}/imgui/imgui_impl_opengl3.cpp
-        ${SRC_DIR}/imgui/imgui_impl_opengl3.h
+        ${INCLUDE_DIR}/imgui/imgui_impl_opengl3.h
         
+        # STB Image Files
         ${INCLUDE_DIR}/stb_image.h
         ${SRC_DIR}/stb_image.cpp)
 
