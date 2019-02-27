@@ -45,6 +45,14 @@ class Window {
             WindowPtr->SetHeight(Height);
             glViewport(0, 0, (GLsizei)Width, (GLsizei)Height);
         }
+
+        inline static void KeyCallback(GLFWwindow * Win, int Key, int Scancode, int Action, int Mods) {
+            if (Key == GLFW_KEY_H)
+                if (Action == GLFW_PRESS)
+                    std::cout << "H pressed" << std::endl; 
+                else if (Action == GLFW_RELEASE)
+                    std::cout << "H released" << std::endl;
+        }
 };
 
 #endif
