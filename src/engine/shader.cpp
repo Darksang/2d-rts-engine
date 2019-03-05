@@ -1,59 +1,23 @@
-#include "renderer/shader.h"
+#include "engine/shader.h"
 
-Shader::Shader(const GLchar * VertexPath, const GLchar * FragmentPath) {
-    // Read programs from specified path
-    std::string VertexCode;
-    std::string FragmentCode;
-
-    std::ifstream VertexShaderFile;
-    std::ifstream FragmentShaderFile;
-
-    VertexShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    FragmentShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-
-    try {
-        VertexShaderFile.open(VertexPath);
-        FragmentShaderFile.open(FragmentPath);
-
-        std::stringstream VertexShaderStream, FragmentShaderStream;
-
-        VertexShaderStream << VertexShaderFile.rdbuf();
-        FragmentShaderStream << FragmentShaderFile.rdbuf();
-
-        VertexShaderFile.close();
-        FragmentShaderFile.close();
-
-        VertexCode = VertexShaderStream.str();
-        FragmentCode = FragmentShaderStream.str();
-    } catch (std::ifstream::failure e) {
-        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
-    }
-
-    const char * VertexStr = VertexCode.c_str();
-    const char * FragmentStr = FragmentCode.c_str();
-
-    // Compile Vertex Shader
-    unsigned int Vertex = glCreateShader(GL_VERTEX_SHADER);
-
-    glShaderSource(Vertex, 1, &VertexStr, NULL);
+void Shader::Compile(const GLchar * VertexSource, const GLchar * FragmentSource) {
+    // Compile Vertex
+    GLuint Vertex = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(Vertex, 1, &VertexSource, NULL);
     glCompileShader(Vertex);
-
     CheckShaderErrors(Vertex, "VERTEX SHADER");
 
-    // Compile Fragment Shader
-    unsigned int Fragment = glCreateShader(GL_FRAGMENT_SHADER);
-
-    glShaderSource(Fragment, 1, &FragmentStr, NULL);
+    // Compile Fragment
+    GLuint Fragment = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(Fragment, 1, &FragmentSource, NULL);
     glCompileShader(Fragment);
-
     CheckShaderErrors(Fragment, "FRAGMENT SHADER");
 
-    // Link into shader program
+    // Link Program
     this->ID = glCreateProgram();
     glAttachShader(this->ID, Vertex);
     glAttachShader(this->ID, Fragment);
     glLinkProgram(this->ID);
-
     CheckShaderErrors(this->ID, "LINK");
 
     glDeleteShader(Vertex);

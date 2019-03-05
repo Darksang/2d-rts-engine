@@ -27,8 +27,6 @@ Window::Window(int Width, int Height, const char * Name) {
 
     glfwMakeContextCurrent(MainWindow);
 
-    //glfwSetInputMode(MainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
     glfwSetFramebufferSizeCallback(MainWindow, FramebufferSizeCallback);
     glfwSetKeyCallback(MainWindow, KeyCallback);
 }

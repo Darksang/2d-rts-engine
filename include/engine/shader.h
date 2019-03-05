@@ -12,9 +12,11 @@
 
 class Shader {
     public:
-        unsigned int ID;
+        GLuint ID;
 
-        Shader(const GLchar * VertexPath, const GLchar * FragmentPath);
+        Shader() { }
+
+        void Compile(const GLchar * VertexSource, const GLchar * FragmentSource);
 
         void Activate();
         void SetBool(const std::string & Name, bool Value) const;
