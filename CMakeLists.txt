@@ -11,12 +11,13 @@ include_directories(${INCLUDE_DIR})
 
 set(SRC ${SRC_DIR}/main.cpp
 
-        ${INCLUDE_DIR}/shader.h
-        ${SRC_DIR}/shader.cpp
-        ${INCLUDE_DIR}/camera.h
-        ${SRC_DIR}/camera.cpp
-        ${INCLUDE_DIR}/window.h
-        ${SRC_DIR}/window.cpp
+        ${INCLUDE_DIR}/engine/camera.h
+        ${SRC_DIR}/engine/camera.cpp
+        ${INCLUDE_DIR}/engine/window.h
+        ${SRC_DIR}/engine/window.cpp
+
+        ${INCLUDE_DIR}/renderer/shader.h
+        ${SRC_DIR}/renderer/shader.cpp
 
         # Dear ImGui Files
         ${INCLUDE_DIR}/imgui/imconfig.h

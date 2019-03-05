@@ -11,11 +11,9 @@
 
 #include <iostream>
 
-#include "window.h"
-#include "shader.h"
-#include "camera.h"
+#include "engine/window.h"
 
-#include "stb_image.h"
+#include "renderer/shader.h"
 
 //void CameraKeyboardMovement(GLFWwindow * Window);
 //void CameraMouseMovement(double PositionX, double PositionY);
@@ -240,7 +238,7 @@ int main(int argc, char * argv[]) {
 
       // Render
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glClear(GL_COLOR_BUFFER_BIT);
 
       /* Render 10 wooden cubes
       glBindTexture(GL_TEXTURE_2D, Texture);

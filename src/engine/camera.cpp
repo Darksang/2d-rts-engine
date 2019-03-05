@@ -1,4 +1,4 @@
-#include "camera.h"
+#include "engine/camera.h"
 
 Camera::Camera(glm::vec3 Position, int FOV, float Near, float Far) {
     Projection = PERSPECTIVE;

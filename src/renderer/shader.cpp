@@ -1,4 +1,4 @@
-#include "shader.h"
+#include "renderer/shader.h"
 
 Shader::Shader(const GLchar * VertexPath, const GLchar * FragmentPath) {
     // Read programs from specified path
