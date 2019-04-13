@@ -7,6 +7,9 @@
 #include "engine/window.h"
 #include "engine/resources_manager.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 // Frame time variables
 float DeltaTime = 0.0f;
 float LastFrameTime = 0.0f;
@@ -29,7 +32,7 @@ int main(int argc, char * argv[]) {
    ImGui::StyleColorsDark();
 
    const char* glsl_version = "#version 150";
-   ImGui_ImplGlfw_InitForOpenGL(GameWindow.GetWindow(), true);
+   ImGui_ImplGlfw_InitForOpenGL(GameWindow.GetWindowPointer(), true);
    ImGui_ImplOpenGL3_Init(glsl_version);
 
    // Game loop
@@ -40,7 +43,7 @@ int main(int argc, char * argv[]) {
       LastFrameTime = CurrentFrameTime;
 
       // Exit
-      if (glfwGetKey(GameWindow.GetWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
+      if (glfwGetKey(GameWindow.GetWindowPointer(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
          GameWindow.Close();
 
       // IMGUI
