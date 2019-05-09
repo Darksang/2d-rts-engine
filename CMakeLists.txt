@@ -11,18 +11,6 @@ include_directories(${INCLUDE_DIR})
 
 set(SRC ${SRC_DIR}/main.cpp
 
-        ${INCLUDE_DIR}/engine/camera.h
-        ${SRC_DIR}/engine/camera.cpp
-        ${INCLUDE_DIR}/engine/window.h
-        ${SRC_DIR}/engine/window.cpp
-        ${INCLUDE_DIR}/engine/transform.h
-        ${INCLUDE_DIR}/engine/resources_manager.h
-        ${SRC_DIR}/engine/resources_manager.cpp
-        ${INCLUDE_DIR}/engine/shader.h
-        ${SRC_DIR}/engine/shader.cpp
-        ${INCLUDE_DIR}/engine/texture.h
-        ${SRC_DIR}/engine/texture.cpp
-
         # Dear ImGui Files
         ${INCLUDE_DIR}/imgui/imconfig.h
         ${SRC_DIR}/imgui/imgui_demo.cpp

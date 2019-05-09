@@ -1,5 +1,9 @@
 #include <iostream>
 
+#include <glad/glad.h>
+
+#include <GLFW/glfw3.h>
+
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
@@ -7,15 +11,30 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "engine/window.h"
-#include "engine/resources_manager.h"
-
-// Frame time variables
-float DeltaTime = 0.0f;
-float LastFrameTime = 0.0f;
+const int SCREEN_WIDTH = 1024;
+const int SCREEN_HEIGHT = 768;
 
 int main(int argc, char * argv[]) {
-   Window GameWindow(1024, 768, "RTSGame");
+   glfwInit();
+
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+   glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
+   #ifdef __APPLE__
+   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+   #endif
+
+   GLFWwindow * Window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "RTS Game", 0, 0);
+
+   if (!Window) {
+      std::cout << "Failed to create GLFW Window" << std::endl;
+      glfwTerminate();
+      return -1;
+   }
+
+   glfwMakeContextCurrent(Window);
 
    // Load all OpenGL function pointers
    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -31,22 +50,12 @@ int main(int argc, char * argv[]) {
 
    ImGui::StyleColorsDark();
 
-   const char* glsl_version = "#version 150";
-   ImGui_ImplGlfw_InitForOpenGL(GameWindow.GetWindow(), true);
+   const char * glsl_version = "#version 150";
+   ImGui_ImplGlfw_InitForOpenGL(Window, true);
    ImGui_ImplOpenGL3_Init(glsl_version);
 
-   // Game loop
-   while (!GameWindow.ShouldClose()) {
-      // Update delta time
-      float CurrentFrameTime = glfwGetTime();
-      DeltaTime = CurrentFrameTime - LastFrameTime;
-      LastFrameTime = CurrentFrameTime;
-
-      // Exit
-      if (glfwGetKey(GameWindow.GetWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
-         GameWindow.Close();
-
-      // IMGUI
+   while (!glfwWindowShouldClose(Window)) {
+      // IMGUI New Frame Prep
       ImGui_ImplOpenGL3_NewFrame();
       ImGui_ImplGlfw_NewFrame();
       ImGui::NewFrame();
@@ -69,25 +78,15 @@ int main(int argc, char * argv[]) {
       // Render ImGui
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-      // Swap screen buffers (front and back buffers)
-      GameWindow.SwapBuffers();
-
-      // NOTE: Fix for initial black screen. GLFW bug on OSX Mojave.
-      #ifdef __APPLE__
-      static bool FixOSX = false;
-
-      if (!FixOSX) {
-         GameWindow.OSXFix();
-         FixOSX = true;
-      }
-      #endif
+      glfwSwapBuffers(Window);
+      glfwPollEvents();
    }
 
-   // Clear allocated resources
    ImGui_ImplOpenGL3_Shutdown();
    ImGui_ImplGlfw_Shutdown();
    ImGui::DestroyContext();
-   ResourcesManager::ClearResources();
+   glfwDestroyWindow(Window);
+   glfwTerminate();
 
    return 0;
 }
