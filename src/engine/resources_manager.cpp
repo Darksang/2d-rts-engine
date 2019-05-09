@@ -54,6 +54,7 @@ Shader ResourcesManager::GetShader(std::string Name) {
 
 void ResourcesManager::LoadTexture(const GLchar * TexturePath, GLboolean Alpha, std::string Name) {
     Texture NewTexture;
+    
     if (Alpha) {
         NewTexture.InternalFormat = GL_RGBA;
         NewTexture.Format = GL_RGBA;

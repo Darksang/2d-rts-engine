@@ -4,6 +4,9 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "engine/window.h"
 #include "engine/resources_manager.h"
 
@@ -84,6 +87,7 @@ int main(int argc, char * argv[]) {
    ImGui_ImplOpenGL3_Shutdown();
    ImGui_ImplGlfw_Shutdown();
    ImGui::DestroyContext();
+   ResourcesManager::ClearResources();
 
    return 0;
 }
