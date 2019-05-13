@@ -17,8 +17,8 @@
 
 #include "stb_image.h"
 
-const int SCREEN_WIDTH = 1024;
-const int SCREEN_HEIGHT = 768;
+const int SCREEN_WIDTH = 800;
+const int SCREEN_HEIGHT = 600;
 
 int main(int argc, char * argv[]) {
    glfwInit();
@@ -47,6 +47,10 @@ int main(int argc, char * argv[]) {
        std::cout << "Failed to initialize GLAD" << std::endl;
        return -1;
    }
+
+   glEnable(GL_CULL_FACE);
+   glEnable(GL_BLEND);
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
    // IMGUI
    IMGUI_CHECKVERSION();
@@ -161,7 +165,7 @@ int main(int argc, char * argv[]) {
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
    int Width, Height, Channels;
-   stbi_set_flip_vertically_on_load(true);
+   //stbi_set_flip_vertically_on_load(true);
    
    unsigned char * Data = stbi_load("resources/sprites/Laharl.png", &Width, &Height, &Channels, 0);
 
@@ -175,7 +179,7 @@ int main(int argc, char * argv[]) {
    glBindTexture(GL_TEXTURE_2D, 0);
 
    // Rendering prep
-   glm::mat4 Projection = glm::ortho(0.0f, 1024.0f, 768.0f, 0.0f, -1.0f, 1.0f);
+   glm::mat4 Projection = glm::ortho(0.0f, 800.0f, 600.0f, 0.0f, -1.0f, 1.0f);
 
    glUseProgram(SpriteShader);
    glUniform1i(glGetUniformLocation(SpriteShader, "Sprite"), 0);
@@ -204,10 +208,10 @@ int main(int argc, char * argv[]) {
 
       // Render Test Sprite
       glUseProgram(SpriteShader);
-      glm::mat4 Model;
+      glm::mat4 Model = glm::mat4(1.0f);;
 
       Model = glm::translate(Model, glm::vec3(200.0f, 200.0f, 0.0f));
-      Model = glm::scale(Model, glm::vec3(300.0f, 400.0f, 1.0f)); // Last scale
+      Model = glm::scale(Model, glm::vec3(152.0f, 162.0f, 1.0f)); // Last scale
 
       glUniformMatrix4fv(glGetUniformLocation(SpriteShader, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(Model));
 
