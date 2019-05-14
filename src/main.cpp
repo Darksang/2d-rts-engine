@@ -18,6 +18,8 @@
 #include "stb_image.h"
 
 #include "shader.h"
+#include "texture.h"
+#include "camera2d.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -94,38 +96,31 @@ int main(int argc, char * argv[]) {
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindVertexArray(0);
 
-   // Texture load
-   GLuint Texture;
-   glGenTextures(1, &Texture);
-   glBindTexture(GL_TEXTURE_2D, Texture);
-
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-   int Width, Height, Channels;
-   //stbi_set_flip_vertically_on_load(true);
-   
-   unsigned char * Data = stbi_load("resources/sprites/Laharl.png", &Width, &Height, &Channels, 0);
-
-   if (Data) {
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Data);
-      glGenerateMipmap(GL_TEXTURE_2D);
-   }
-
-   stbi_image_free(Data);
-
-   glBindTexture(GL_TEXTURE_2D, 0);
+   Texture PlayerTexture("resources/sprites/Laharl.png", true);
 
    // Rendering prep
-   glm::mat4 Projection = glm::ortho(0.0f, 800.0f, 600.0f, 0.0f, -1.0f, 1.0f);
+   glm::mat4 Projection = glm::ortho(0.0f, static_cast<float>(SCREEN_WIDTH), static_cast<float>(SCREEN_HEIGHT), 0.0f, -1.0f, 1.0f);
 
    SpriteShader.Use();
    SpriteShader.SetInt("Sprite", 0);
    SpriteShader.SetMat4("ProjectionMatrix", Projection);
 
+   // Camera
+   Camera2D OrthographicCamera(SCREEN_WIDTH, SCREEN_HEIGHT);
+
    while (!glfwWindowShouldClose(Window)) {
+      /* Process Input
+      if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS) {
+         OrthographicCamera.SetPosition(OrthographicCamera.GetPosition() + glm::vec2(0.0f, 0.5f));
+      }
+
+      if (glfwGetKey(Window, GLFW_KEY_S) == GLFW_PRESS) {
+         OrthographicCamera.SetPosition(OrthographicCamera.GetPosition() + glm::vec2(0.0f, -0.5f));
+      } */
+
+      // Game Update
+      OrthographicCamera.Update();
+
       // IMGUI New Frame Prep
       ImGui_ImplOpenGL3_NewFrame();
       ImGui_ImplGlfw_NewFrame();
@@ -133,13 +128,22 @@ int main(int argc, char * argv[]) {
 
       {
          ImGui::Begin("Hello, World");
-
          ImGui::Text("This is a test");
-
          ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
          ImGui::End();
       }
+
+      /* Camera Info
+      {
+         ImGui::Begin("Camera");
+         float * CameraX = &OrthographicCamera.Position.x;
+         float * CameraY = &OrthographicCamera.Position.y;
+         ImGui::InputFloat("Camera X", CameraX);
+         ImGui::InputFloat("Camera Y", CameraY);
+         //if (ImGui::Button("Save"))
+            //OrthographicCamera.Position = glm::vec2(CameraX, CameraY);
+         ImGui::End();
+      } */
 
       ImGui::Render();
 
@@ -150,13 +154,14 @@ int main(int argc, char * argv[]) {
       SpriteShader.Use();
       glm::mat4 Model = glm::mat4(1.0f);;
 
-      Model = glm::translate(Model, glm::vec3(200.0f, 200.0f, 0.0f));
+      Model = glm::translate(Model, glm::vec3(0.0f, 0.0f, 0.0f));
       Model = glm::scale(Model, glm::vec3(152.0f, 162.0f, 1.0f));
 
       SpriteShader.SetMat4("ModelMatrix", Model);
+      SpriteShader.SetMat4("ViewMatrix", OrthographicCamera.GetViewMatrix());
 
       glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, Texture);
+      PlayerTexture.Bind();
 
       glBindVertexArray(VAO);
       glDrawArrays(GL_TRIANGLES, 0, 6);

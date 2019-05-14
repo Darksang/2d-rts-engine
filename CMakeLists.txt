@@ -13,6 +13,10 @@ set(SRC ${SRC_DIR}/main.cpp
 
         ${INCLUDE_DIR}/shader.h
         ${SRC_DIR}/shader.cpp
+        ${INCLUDE_DIR}/texture.h
+        ${SRC_DIR}/texture.cpp
+        ${INCLUDE_DIR}/camera2d.h
+        ${SRC_DIR}/camera2d.cpp
 
         # Dear ImGui Files
         ${INCLUDE_DIR}/imgui/imconfig.h
