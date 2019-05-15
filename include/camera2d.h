@@ -6,21 +6,29 @@
 
 class Camera2D {
     public:
-        Camera2D(int ScreenWidth, int ScreenHeight);
+        Camera2D(float ScreenWidth, float ScreenHeight);
 
+        // Position of the camera
         glm::vec2 Position;
-        float Scale;
+        // Zoom of the camera
+        float Zoom;
+        float MinimumZoom;
+        float MaximumZoom;
 
-        void Update();
+        void Translate(const glm::vec2 & Translation);
+        void ZoomIn(float Zoom);
+        void ZoomOut(float Zoom);
 
-        glm::mat4 GetViewMatrix() { return ViewMatrix; }
+        glm::mat4 GetViewMatrix();
+        glm::mat4 GetProjectionMatrix() { return ProjectionMatrix; }
 
     private:
-        int Width, Height;
-        
-        glm::mat4 ViewMatrix;
+        void ClampZoom(float Value);
 
-        bool HasToUpdate;
+        float ViewportWidth, ViewportHeight;
+        
+        glm::mat4 ProjectionMatrix;
+        glm::mat4 ViewMatrix;
 };
 
 #endif

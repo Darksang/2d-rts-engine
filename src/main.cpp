@@ -21,8 +21,8 @@
 #include "texture.h"
 #include "camera2d.h"
 
-const int SCREEN_WIDTH = 800;
-const int SCREEN_HEIGHT = 600;
+const float SCREEN_WIDTH = 800.0f;
+const float SCREEN_HEIGHT = 600.0f;
 
 int main(int argc, char * argv[]) {
    glfwInit();
@@ -36,7 +36,7 @@ int main(int argc, char * argv[]) {
    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
    #endif
 
-   GLFWwindow * Window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "RTS Game", 0, 0);
+   GLFWwindow * Window = glfwCreateWindow(static_cast<int>(SCREEN_WIDTH), static_cast<int>(SCREEN_HEIGHT), "RTS Game", 0, 0);
 
    if (!Window) {
       std::cout << "Failed to create GLFW Window" << std::endl;
@@ -98,15 +98,13 @@ int main(int argc, char * argv[]) {
 
    Texture PlayerTexture("resources/sprites/Laharl.png", true);
 
-   // Rendering prep
-   glm::mat4 Projection = glm::ortho(0.0f, static_cast<float>(SCREEN_WIDTH), static_cast<float>(SCREEN_HEIGHT), 0.0f, -1.0f, 1.0f);
+   // Camera
+   Camera2D Camera(SCREEN_WIDTH, SCREEN_HEIGHT);
 
+   // Rendering prep
    SpriteShader.Use();
    SpriteShader.SetInt("Sprite", 0);
-   SpriteShader.SetMat4("ProjectionMatrix", Projection);
-
-   // Camera
-   Camera2D OrthographicCamera(SCREEN_WIDTH, SCREEN_HEIGHT);
+   SpriteShader.SetMat4("ProjectionMatrix", Camera.GetProjectionMatrix());
 
    while (!glfwWindowShouldClose(Window)) {
       /* Process Input
@@ -119,7 +117,7 @@ int main(int argc, char * argv[]) {
       } */
 
       // Game Update
-      OrthographicCamera.Update();
+      //Camera.Update();
 
       // IMGUI New Frame Prep
       ImGui_ImplOpenGL3_NewFrame();
@@ -133,17 +131,23 @@ int main(int argc, char * argv[]) {
          ImGui::End();
       }
 
-      /* Camera Info
+      // Camera Test
       {
          ImGui::Begin("Camera");
-         float * CameraX = &OrthographicCamera.Position.x;
-         float * CameraY = &OrthographicCamera.Position.y;
-         ImGui::InputFloat("Camera X", CameraX);
-         ImGui::InputFloat("Camera Y", CameraY);
-         //if (ImGui::Button("Save"))
-            //OrthographicCamera.Position = glm::vec2(CameraX, CameraY);
+         if (ImGui::Button("Move Down"))
+            Camera.Translate(glm::vec2(0.0f, 10.0f));
+         if (ImGui::Button("Move Up"))
+            Camera.Translate(glm::vec2(0.0f, -10.0f));
+         if (ImGui::Button("Move Right"))
+            Camera.Translate(glm::vec2(10.0f, 0.0f));
+         if (ImGui::Button("Move Left"))
+            Camera.Translate(glm::vec2(-10.0f, 0.0f));
+         if (ImGui::Button("Zoom In"))
+            Camera.ZoomIn(0.05f);
+         if (ImGui::Button("Zoom Out"))
+            Camera.ZoomOut(0.05f);
          ImGui::End();
-      } */
+      }
 
       ImGui::Render();
 
@@ -154,11 +158,11 @@ int main(int argc, char * argv[]) {
       SpriteShader.Use();
       glm::mat4 Model = glm::mat4(1.0f);;
 
-      Model = glm::translate(Model, glm::vec3(0.0f, 0.0f, 0.0f));
+      Model = glm::translate(Model, glm::vec3(0.0f - PlayerTexture.Width / 2.0f, 0.0f - PlayerTexture.Height / 2.0f, 0.0f));
       Model = glm::scale(Model, glm::vec3(152.0f, 162.0f, 1.0f));
 
       SpriteShader.SetMat4("ModelMatrix", Model);
-      SpriteShader.SetMat4("ViewMatrix", OrthographicCamera.GetViewMatrix());
+      SpriteShader.SetMat4("ViewMatrix", Camera.GetViewMatrix());
 
       glActiveTexture(GL_TEXTURE0);
       PlayerTexture.Bind();
