@@ -17,9 +17,10 @@
 
 #include "stb_image.h"
 
-#include "shader.h"
-#include "texture.h"
-#include "camera2d.h"
+#include "engine/shader.h"
+#include "engine/texture.h"
+#include "engine/camera2d.h"
+#include "engine/game_object.h"
 
 const float SCREEN_WIDTH = 800.0f;
 const float SCREEN_HEIGHT = 600.0f;
@@ -106,7 +107,14 @@ int main(int argc, char * argv[]) {
    SpriteShader.SetInt("Sprite", 0);
    SpriteShader.SetMat4("ProjectionMatrix", Camera.GetProjectionMatrix());
 
+   double DeltaTime = 0.0f;
+   double LastFrame = 0.0f;
+   int TotalFrames = 0;
+
    while (!glfwWindowShouldClose(Window)) {
+      double CurrentFrame = glfwGetTime();
+      DeltaTime = CurrentFrame - LastFrame;
+      LastFrame = CurrentFrame;
       /* Process Input
       if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS) {
          OrthographicCamera.SetPosition(OrthographicCamera.GetPosition() + glm::vec2(0.0f, 0.5f));
@@ -149,6 +157,14 @@ int main(int argc, char * argv[]) {
          ImGui::End();
       }
 
+      // Other Info
+      {
+         ImGui::Begin("Information");
+         ImGui::Text("Time Since Start (s): %.2f", CurrentFrame);
+         ImGui::Text("Frame Count: %i", TotalFrames);
+         ImGui::End();
+      }
+
       ImGui::Render();
 
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -176,6 +192,8 @@ int main(int argc, char * argv[]) {
 
       glfwSwapBuffers(Window);
       glfwPollEvents();
+
+      TotalFrames++;
    }
 
    ImGui_ImplOpenGL3_Shutdown();

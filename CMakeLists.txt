@@ -11,12 +11,19 @@ include_directories(${INCLUDE_DIR})
 
 set(SRC ${SRC_DIR}/main.cpp
 
-        ${INCLUDE_DIR}/shader.h
-        ${SRC_DIR}/shader.cpp
-        ${INCLUDE_DIR}/texture.h
-        ${SRC_DIR}/texture.cpp
-        ${INCLUDE_DIR}/camera2d.h
-        ${SRC_DIR}/camera2d.cpp
+        # Engine Files
+        ${INCLUDE_DIR}/engine/shader.h
+        ${SRC_DIR}/engine/shader.cpp
+        ${INCLUDE_DIR}/engine/texture.h
+        ${SRC_DIR}/engine/texture.cpp
+        ${INCLUDE_DIR}/engine/camera2d.h
+        ${SRC_DIR}/engine/camera2d.cpp
+        ${INCLUDE_DIR}/engine/game_object.h
+        ${SRC_DIR}/engine/game_object.cpp
+
+        # Game Files
+        ${INCLUDE_DIR}/game/steering.h
+        ${INCLUDE_DIR}/game/steerings/behaviour.h
 
         # Dear ImGui Files
         ${INCLUDE_DIR}/imgui/imconfig.h
