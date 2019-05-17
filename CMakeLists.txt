@@ -20,6 +20,10 @@ set(SRC ${SRC_DIR}/main.cpp
         ${SRC_DIR}/engine/camera2d.cpp
         ${INCLUDE_DIR}/engine/game_object.h
         ${SRC_DIR}/engine/game_object.cpp
+        ${INCLUDE_DIR}/engine/sprite_renderer.h
+        ${SRC_DIR}/engine/sprite_renderer.cpp
+        ${INCLUDE_DIR}/engine/transform2d.h
+        ${INCLUDE_DIR}/engine/sprite.h
 
         # Game Files
         ${INCLUDE_DIR}/game/steering.h
