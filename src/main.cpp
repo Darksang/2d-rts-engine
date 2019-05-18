@@ -139,16 +139,16 @@ int main(int argc, char * argv[]) {
       // Game Update
       //Camera.Update();
 
-      /* IMGUI New Frame Prep
+      // IMGUI New Frame Prep
       ImGui_ImplOpenGL3_NewFrame();
       ImGui_ImplGlfw_NewFrame();
-      ImGui::NewFrame();*/
+      ImGui::NewFrame();
 
       {
          //ImGui::ShowDemoWindow();
       }
 
-      /* Camera Test
+      // Camera Test
       {
          ImGui::Begin("Camera");
          if (ImGui::Button("Move Down"))
@@ -170,8 +170,7 @@ int main(int argc, char * argv[]) {
       {
          ImGui::Begin("Information");
          ImGui::Text("Time Since Start: %.2f s", CurrentTime);
-         ImGui::Text("Frame Time: %.3f ms", DeltaTime * 1000.0f);
-         ImGui::Text("Frames Per Second: %.1f", 1000.0f / (DeltaTime * 1000.0f));
+         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
          ImGui::Text("Frame Count: %i", FrameCount);
          ImGui::End();
       }
@@ -197,7 +196,7 @@ int main(int argc, char * argv[]) {
             ImGui::BulletText("Rotation: %f", Player.Transform.Rotation);
          }
          ImGui::End();
-      }*/
+      }
 
       // Render Scene
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -225,8 +224,8 @@ int main(int argc, char * argv[]) {
       glBindVertexArray(0); */
 
       // Render ImGui
-      //ImGui::Render();
-      //ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+      ImGui::Render();
+      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
       glfwSwapBuffers(Window);
       glfwPollEvents();

@@ -12,7 +12,6 @@ class Shader {
         GLuint ID;
 
         Shader(const std::string & VertexPath, const std::string & FragmentPath);
-        ~Shader() { glDeleteProgram(ID); }
         
         void Use();
 

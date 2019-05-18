@@ -9,7 +9,7 @@ SpriteRenderer::SpriteRenderer(Shader SpriteShader, Camera2D * Camera) : SpriteS
 }
 
 SpriteRenderer::~SpriteRenderer() {
-    glDeleteVertexArrays(1, &VAO);
+    //glDeleteVertexArrays(1, &VAO);
 }
 
 void SpriteRenderer::Draw(Sprite S) {
