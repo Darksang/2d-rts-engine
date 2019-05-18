@@ -15,6 +15,10 @@ void Camera2D::Translate(const glm::vec2 & Translation) {
     Position += Translation;
 }
 
+void Camera2D::LookAt(const glm::vec2 & Point) {
+    Position = Point;
+}
+
 void Camera2D::ZoomIn(float Zoom) {
     ClampZoom(this->Zoom + Zoom);
 }

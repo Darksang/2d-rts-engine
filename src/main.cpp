@@ -40,6 +40,7 @@ int main(int argc, char * argv[]) {
    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+   //glfwWindowHint(GLFW_DECORATED, GL_FALSE);
    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
    #ifdef __APPLE__
@@ -123,7 +124,14 @@ int main(int argc, char * argv[]) {
       ImGui::NewFrame();
 
       {
-         //ImGui::ShowDemoWindow();
+         ImGui::ShowDemoWindow();
+      }
+
+      // Main Menu
+      {
+         if (ImGui::BeginMainMenuBar()) {
+            ImGui::EndMainMenuBar();
+         }
       }
 
       // Camera Test
@@ -137,6 +145,8 @@ int main(int argc, char * argv[]) {
             Camera.Translate(glm::vec2(10.0f, 0.0f));
          if (ImGui::Button("Move Left"))
             Camera.Translate(glm::vec2(-10.0f, 0.0f));
+         if (ImGui::Button("Test LookAt"))
+            Camera.LookAt(glm::vec2(20.0f, 20.0f));
          ImGui::End();
       }
 
@@ -173,8 +183,7 @@ int main(int argc, char * argv[]) {
                ImGui::TreePop();
             }
 
-            ImGui::InputFloat("Rotation", &Player.Transform.Rotation);
-            //ImGui::BulletText("Rotation: %f", Player.Transform.Rotation);
+            ImGui::SliderFloat("Rotation", &Player.Transform.Rotation, 0.0f, 360.0f);
          }
          ImGui::End();
       }

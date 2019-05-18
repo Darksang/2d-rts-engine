@@ -18,7 +18,7 @@ class SpriteRenderer {
 
         Camera2D * Camera;
 
-        void Draw(Sprite S);
+        void Draw(Sprite & S);
 
     private:
         GLuint VAO;

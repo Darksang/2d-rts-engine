@@ -2,13 +2,11 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "imgui/imgui.h"
-
 SpriteRenderer::SpriteRenderer(Shader SpriteShader, Camera2D * Camera) : SpriteShader(SpriteShader), Camera(Camera) {
     Initialize();
 }
 
-void SpriteRenderer::Draw(Sprite S) {
+void SpriteRenderer::Draw(Sprite & S) {
     SpriteShader.Use();
 
     // Create Model Matrix

@@ -16,6 +16,7 @@ class Camera2D {
         float MaximumZoom;
 
         void Translate(const glm::vec2 & Translation);
+        void LookAt(const glm::vec2 & Point);
         void ZoomIn(float Zoom);
         void ZoomOut(float Zoom);
 
