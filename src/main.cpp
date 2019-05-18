@@ -27,6 +27,13 @@
 const float SCREEN_WIDTH = 1024.0f;
 const float SCREEN_HEIGHT = 768.0f;
 
+glm::vec2 MouseWheelDelta = glm::vec2(0.0f, 0.0f);
+
+void ScrollCallback(GLFWwindow * Window, double OffsetX, double OffsetY) {
+   //std::cout << "Offset X - " << OffsetX << " Offset Y - " << OffsetY << std::endl;
+   MouseWheelDelta.y = OffsetY;
+}
+
 int main(int argc, char * argv[]) {
    glfwInit();
 
@@ -48,6 +55,8 @@ int main(int argc, char * argv[]) {
    }
 
    glfwMakeContextCurrent(Window);
+
+   glfwSetScrollCallback(Window, ScrollCallback);
 
    // Load all OpenGL function pointers
    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -73,53 +82,21 @@ int main(int argc, char * argv[]) {
 
    Shader SpriteShader("resources/shaders/vertex/sprite.glsl", "resources/shaders/fragment/sprite.glsl");
 
-   /* Configure Sprite Rendering Data
-   GLuint VAO, VBO;
-   GLfloat Vertices[] = {
-      // Pos      // Tex
-      0.0f, 1.0f, 0.0f, 1.0f,
-      1.0f, 0.0f, 1.0f, 0.0f,
-      0.0f, 0.0f, 0.0f, 0.0f, 
-   
-      0.0f, 1.0f, 0.0f, 1.0f,
-      1.0f, 1.0f, 1.0f, 1.0f,
-      1.0f, 0.0f, 1.0f, 0.0f
-   };
-
-   glGenVertexArrays(1, &VAO);
-   glGenBuffers(1, &VBO);
-
-   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-   glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
-
-   glBindVertexArray(VAO);
-   glEnableVertexAttribArray(0);
-   glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GL_FLOAT), (GLvoid *)0);
-
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindVertexArray(0); */
-
-   Texture PlayerTexture("resources/sprites/Laharl.png", true);
-
    // Camera
    Camera2D Camera(SCREEN_WIDTH, SCREEN_HEIGHT);
-
-   /* Rendering prep
-   SpriteShader.Use();
-   SpriteShader.SetInt("Sprite", 0);
-   SpriteShader.SetMat4("ProjectionMatrix", Camera.GetProjectionMatrix()); */
    
    // Sprite Renderer
    SpriteRenderer Renderer(SpriteShader, &Camera);
+
+   Texture PlayerTexture("resources/sprites/Laharl.png", true);
+
    Sprite Player(PlayerTexture);
    Player.Transform.Position.x = 20.0f;
+   Player.Transform.Rotation = 45.0f;
+
    Sprite Player2(PlayerTexture);
    Player2.Transform.Position.x = 67.0f;
    Player2.Transform.Position.y = -100.0f;
-
-   /*Transform2D TransformTest;
-   TransformTest.Position.x = 0.0f - PlayerTexture.Width / 2.0f;
-   TransformTest.Position.y = 0.0f - PlayerTexture.Height / 2.0f; */
 
    double DeltaTime = 0.0f;
    double LastFrameTime = glfwGetTime();
@@ -130,11 +107,12 @@ int main(int argc, char * argv[]) {
       DeltaTime = CurrentTime - LastFrameTime;
       LastFrameTime = CurrentTime;
 
-      if (glfwGetKey(Window, GLFW_KEY_SPACE) == GLFW_PRESS)
-         Player.Transform.Position.x = -500.0f;
+      glfwPollEvents();
 
-      if (glfwGetKey(Window, GLFW_KEY_G) == GLFW_PRESS)
-         Player.Transform.Position.x = 500.0f;
+      if (MouseWheelDelta.y > 0.0f)
+         Camera.ZoomIn(MouseWheelDelta.y * 0.1f);
+      else if (MouseWheelDelta.y < 0.0f)
+         Camera.ZoomOut(-MouseWheelDelta.y * 0.1f);
 
       // Game Update
       //Camera.Update();
@@ -159,10 +137,12 @@ int main(int argc, char * argv[]) {
             Camera.Translate(glm::vec2(10.0f, 0.0f));
          if (ImGui::Button("Move Left"))
             Camera.Translate(glm::vec2(-10.0f, 0.0f));
-         if (ImGui::Button("Zoom In"))
-            Camera.ZoomIn(0.05f);
-         if (ImGui::Button("Zoom Out"))
-            Camera.ZoomOut(0.05f);
+         ImGui::End();
+      }
+
+      {
+         ImGui::Begin("Input");
+         ImGui::BulletText("Mouse Wheel Delta: %f", MouseWheelDelta.y);
          ImGui::End();
       }
 
@@ -193,7 +173,8 @@ int main(int argc, char * argv[]) {
                ImGui::TreePop();
             }
 
-            ImGui::BulletText("Rotation: %f", Player.Transform.Rotation);
+            ImGui::InputFloat("Rotation", &Player.Transform.Rotation);
+            //ImGui::BulletText("Rotation: %f", Player.Transform.Rotation);
          }
          ImGui::End();
       }
@@ -205,30 +186,14 @@ int main(int argc, char * argv[]) {
       Renderer.Draw(Player);
       Renderer.Draw(Player2);
 
-      /* Render Test Sprite
-      SpriteShader.Use();
-      glm::mat4 Model = glm::mat4(1.0f);
-
-      //Model = glm::translate(Model, glm::vec3(0.0f - PlayerTexture.Width / 2.0f, 0.0f - PlayerTexture.Height / 2.0f, 0.0f));
-      Model = glm::translate(Model, glm::vec3(TransformTest.Position, 0.0f));
-      Model = glm::scale(Model, glm::vec3(152.0f, 162.0f, 1.0f));
-
-      SpriteShader.SetMat4("ModelMatrix", Model);
-      SpriteShader.SetMat4("ViewMatrix", Camera.GetViewMatrix());
-
-      glActiveTexture(GL_TEXTURE0);
-      PlayerTexture.Bind();
-
-      glBindVertexArray(VAO);
-      glDrawArrays(GL_TRIANGLES, 0, 6);
-      glBindVertexArray(0); */
-
       // Render ImGui
       ImGui::Render();
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
       glfwSwapBuffers(Window);
-      glfwPollEvents();
+
+      // Reset Input for next frame
+      MouseWheelDelta.y = 0.0f;
 
       FrameCount++;
    }

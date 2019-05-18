@@ -13,7 +13,6 @@
 class SpriteRenderer {
     public:
         SpriteRenderer(Shader SpriteShader, Camera2D * Camera);
-        ~SpriteRenderer();
 
         Shader SpriteShader;
 
