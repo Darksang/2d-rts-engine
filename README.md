@@ -15,3 +15,4 @@ After the executable is generated, copy the *resources* folder from the root dir
 - [glad](https://github.com/Dav1dde/glad)
 - [OpenGL Mathematics 0.9.9.3](https://glm.g-truc.net/0.9.9/index.html)
 - [Dear ImGui](https://github.com/ocornut/imgui)
+- [Box2D](https://github.com/erincatto/Box2D)

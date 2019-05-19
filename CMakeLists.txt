@@ -9,44 +9,30 @@ set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 include_directories(${INCLUDE_DIR})
 
+# Add all source files from Box2D
+file(GLOB_RECURSE BOX2D ${SRC_DIR}/Box2D/*.cpp)
+
+# Add all source files from ImGui
+file(GLOB_RECURSE IMGUI ${SRC_DIR}/imgui/*.cpp)
+
 set(SRC ${SRC_DIR}/main.cpp
 
         # Engine Files
-        ${INCLUDE_DIR}/engine/shader.h
-        ${SRC_DIR}/engine/shader.cpp
-        ${INCLUDE_DIR}/engine/texture.h
-        ${SRC_DIR}/engine/texture.cpp
-        ${INCLUDE_DIR}/engine/camera2d.h
         ${SRC_DIR}/engine/camera2d.cpp
-        ${INCLUDE_DIR}/engine/game_object.h
         ${SRC_DIR}/engine/game_object.cpp
-        ${INCLUDE_DIR}/engine/sprite_renderer.h
+        ${SRC_DIR}/engine/shader.cpp
         ${SRC_DIR}/engine/sprite_renderer.cpp
-        ${INCLUDE_DIR}/engine/transform2d.h
-        ${INCLUDE_DIR}/engine/sprite.h
+        ${SRC_DIR}/engine/texture.cpp
 
         # Game Files
-        ${INCLUDE_DIR}/game/steering.h
-        ${INCLUDE_DIR}/game/steerings/behaviour.h
+
+        # Box2D Files
+        ${BOX2D}
 
         # Dear ImGui Files
-        ${INCLUDE_DIR}/imgui/imconfig.h
-        ${SRC_DIR}/imgui/imgui_demo.cpp
-        ${SRC_DIR}/imgui/imgui_draw.cpp
-        ${INCLUDE_DIR}/imgui/imgui_internal.h
-        ${SRC_DIR}/imgui/imgui_widgets.cpp
-        ${SRC_DIR}/imgui/imgui.cpp
-        ${INCLUDE_DIR}/imgui/imgui.h
-        ${INCLUDE_DIR}/imgui/imstb_rectpack.h
-        ${INCLUDE_DIR}/imgui/imstb_textedit.h
-        ${INCLUDE_DIR}/imgui/imstb_truetype.h
-        ${SRC_DIR}/imgui/imgui_impl_glfw.cpp
-        ${INCLUDE_DIR}/imgui/imgui_impl_glfw.h
-        ${SRC_DIR}/imgui/imgui_impl_opengl3.cpp
-        ${INCLUDE_DIR}/imgui/imgui_impl_opengl3.h
+        ${IMGUI}
         
         # STB Image Files
-        ${INCLUDE_DIR}/stb_image.h
         ${SRC_DIR}/stb_image.cpp)
 
 # Executable Definition

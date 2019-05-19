@@ -15,6 +15,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Box2D/Box2D.h"
+
 #include "stb_image.h"
 
 #include "engine/shader.h"
@@ -86,6 +88,10 @@ int main(int argc, char * argv[]) {
    ImGui_ImplGlfw_InitForOpenGL(Window, true);
    ImGui_ImplOpenGL3_Init(glsl_version);
 
+   // Box2D
+   b2Vec2 Gravity(0.0f, -10.0f);
+   b2World World(Gravity);
+
    Shader SpriteShader("resources/shaders/vertex/sprite.glsl", "resources/shaders/fragment/sprite.glsl");
 
    // Camera
@@ -120,16 +126,16 @@ int main(int argc, char * argv[]) {
       else if (MouseWheelDelta.y < 0.0f)
          Camera.ZoomOut(-MouseWheelDelta.y * 0.1f);
 
-      if (glfwGetKey(Window, GLFW_KEY_LEFT) == GLFW_PRESS)
+      if (glfwGetKey(Window, GLFW_KEY_A) == GLFW_PRESS)
          Camera.Translate(glm::vec2(-100.0f, 0.0f) * static_cast<float>(DeltaTime));
       
-      if (glfwGetKey(Window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+      if (glfwGetKey(Window, GLFW_KEY_D) == GLFW_PRESS)
          Camera.Translate(glm::vec2(100.0f, 0.0f) * static_cast<float>(DeltaTime));
 
-      if (glfwGetKey(Window, GLFW_KEY_UP) == GLFW_PRESS)
+      if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS)
          Camera.Translate(glm::vec2(0.0f, -100.0f) * static_cast<float>(DeltaTime));
 
-      if (glfwGetKey(Window, GLFW_KEY_DOWN) == GLFW_PRESS)
+      if (glfwGetKey(Window, GLFW_KEY_S) == GLFW_PRESS)
          Camera.Translate(glm::vec2(0.0f, 100.0f) * static_cast<float>(DeltaTime));
 
       // Test: Move sprite around world using mouse
