@@ -28,10 +28,15 @@ const float SCREEN_WIDTH = 1024.0f;
 const float SCREEN_HEIGHT = 768.0f;
 
 glm::vec2 MouseWheelDelta = glm::vec2(0.0f, 0.0f);
+glm::vec2 MousePosition = glm::vec2(0.0f, 0.0f);
 
 void ScrollCallback(GLFWwindow * Window, double OffsetX, double OffsetY) {
-   //std::cout << "Offset X - " << OffsetX << " Offset Y - " << OffsetY << std::endl;
-   MouseWheelDelta.y = OffsetY;
+   MouseWheelDelta.y = static_cast<float>(OffsetY);
+}
+
+void MousePositionCallback(GLFWwindow * Window, double PositionX, double PositionY) {
+   MousePosition.x = static_cast<float>(PositionX);
+   MousePosition.y = static_cast<float>(PositionY);
 }
 
 int main(int argc, char * argv[]) {
@@ -40,7 +45,6 @@ int main(int argc, char * argv[]) {
    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-   //glfwWindowHint(GLFW_DECORATED, GL_FALSE);
    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
    #ifdef __APPLE__
@@ -57,6 +61,7 @@ int main(int argc, char * argv[]) {
 
    glfwMakeContextCurrent(Window);
 
+   glfwSetCursorPosCallback(Window, MousePositionCallback);
    glfwSetScrollCallback(Window, ScrollCallback);
 
    // Load all OpenGL function pointers
@@ -115,8 +120,23 @@ int main(int argc, char * argv[]) {
       else if (MouseWheelDelta.y < 0.0f)
          Camera.ZoomOut(-MouseWheelDelta.y * 0.1f);
 
-      // Game Update
-      //Camera.Update();
+      if (glfwGetKey(Window, GLFW_KEY_LEFT) == GLFW_PRESS)
+         Camera.Translate(glm::vec2(-100.0f, 0.0f) * static_cast<float>(DeltaTime));
+      
+      if (glfwGetKey(Window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+         Camera.Translate(glm::vec2(100.0f, 0.0f) * static_cast<float>(DeltaTime));
+
+      if (glfwGetKey(Window, GLFW_KEY_UP) == GLFW_PRESS)
+         Camera.Translate(glm::vec2(0.0f, -100.0f) * static_cast<float>(DeltaTime));
+
+      if (glfwGetKey(Window, GLFW_KEY_DOWN) == GLFW_PRESS)
+         Camera.Translate(glm::vec2(0.0f, 100.0f) * static_cast<float>(DeltaTime));
+
+      // Test: Move sprite around world using mouse
+      if (glfwGetMouseButton(Window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+         glm::vec2 NewPos = Camera.ScreenToWorld(MousePosition);
+         Player.Transform.Position = NewPos;
+      }
 
       // IMGUI New Frame Prep
       ImGui_ImplOpenGL3_NewFrame();
@@ -130,6 +150,11 @@ int main(int argc, char * argv[]) {
       // Main Menu
       {
          if (ImGui::BeginMainMenuBar()) {
+            if (ImGui::BeginMenu("General")) {
+               if (ImGui::MenuItem("Exit"))
+                  glfwSetWindowShouldClose(Window, true);
+               ImGui::EndMenu();
+            }
             ImGui::EndMainMenuBar();
          }
       }
@@ -137,22 +162,13 @@ int main(int argc, char * argv[]) {
       // Camera Test
       {
          ImGui::Begin("Camera");
-         if (ImGui::Button("Move Down"))
-            Camera.Translate(glm::vec2(0.0f, 10.0f));
-         if (ImGui::Button("Move Up"))
-            Camera.Translate(glm::vec2(0.0f, -10.0f));
-         if (ImGui::Button("Move Right"))
-            Camera.Translate(glm::vec2(10.0f, 0.0f));
-         if (ImGui::Button("Move Left"))
-            Camera.Translate(glm::vec2(-10.0f, 0.0f));
-         if (ImGui::Button("Test LookAt"))
-            Camera.LookAt(glm::vec2(20.0f, 20.0f));
-         ImGui::End();
-      }
-
-      {
-         ImGui::Begin("Input");
-         ImGui::BulletText("Mouse Wheel Delta: %f", MouseWheelDelta.y);
+         if (ImGui::CollapsingHeader("Position")) {
+            ImGui::BulletText("Position X: %.4f", Camera.Position.x);
+            ImGui::BulletText("Position Y: %.4f", Camera.Position.y);
+         }
+         ImGui::BulletText("Zoom: %.2f", Camera.Zoom);
+         ImGui::BulletText("Minimum Zoom: %.2f", Camera.MinimumZoom);
+         ImGui::BulletText("Maximum Zoom: %.2f", Camera.MaximumZoom);
          ImGui::End();
       }
 
@@ -162,6 +178,9 @@ int main(int argc, char * argv[]) {
          ImGui::Text("Time Since Start: %.2f s", CurrentTime);
          ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
          ImGui::Text("Frame Count: %i", FrameCount);
+         ImGui::Text("Mouse Screen Position: %.0fx %.0fy", MousePosition.x, MousePosition.y);
+         glm::vec2 MouseWorldPos = Camera.ScreenToWorld(MousePosition);
+         ImGui::Text("Mouse World Position: %.0fx %.0fy", MouseWorldPos.x, MouseWorldPos.y);
          ImGui::End();
       }
 

@@ -20,6 +20,8 @@ class Camera2D {
         void ZoomIn(float Zoom);
         void ZoomOut(float Zoom);
 
+        glm::vec2 ScreenToWorld(const glm::vec2 & Point);
+
         glm::mat4 GetViewMatrix();
         glm::mat4 GetProjectionMatrix() { return ProjectionMatrix; }
 
