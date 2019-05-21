@@ -226,6 +226,7 @@ int main(int argc, char * argv[]) {
       Renderer.Draw(Player2);
 
       DebugRenderer.DrawPoint(glm::vec2(-3.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 3.0f);
+      DebugRenderer.DrawSegment(glm::vec2(0.0f, 0.0f), glm::vec2(3.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
       DebugRenderer.Render();
 

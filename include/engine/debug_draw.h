@@ -26,6 +26,7 @@ class DebugDraw : public b2Draw {
 
         void DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color) override;
 
+        void DrawSegment(const glm::vec2 & P1, const glm::vec2 & P2, const glm::vec3 & Color);
         void DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color) override;
 
         void DrawTransform(const b2Transform& xf) override;
@@ -37,7 +38,9 @@ class DebugDraw : public b2Draw {
 
     private:
         Camera2D * Camera;
+
         RenderPoints * Points;
+        RenderLines * Lines;
 };
 
 #endif
