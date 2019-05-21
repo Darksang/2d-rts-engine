@@ -11,6 +11,7 @@ class Shader {
     public:
         GLuint ID;
 
+        Shader() { ID = 0; }
         Shader(const std::string & VertexPath, const std::string & FragmentPath);
         
         void Use();

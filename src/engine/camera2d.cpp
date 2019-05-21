@@ -28,7 +28,7 @@ void Camera2D::ZoomOut(float Zoom) {
 }
 
 glm::vec2 Camera2D::ScreenToWorld(const glm::vec2 & Point) {
-    glm::vec2 Result = glm::inverse(GetViewMatrix()) * glm::vec4(Point.x, Point.y, 1.0f, 1.0f);
+    glm::vec2 Result = glm::inverse(GetViewMatrix()) * glm::vec4(Point.x * 0.01, Point.y * 0.01, 1.0f, 1.0f);
     return glm::vec2(Result.x, Result.y);
 }
 

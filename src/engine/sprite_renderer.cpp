@@ -2,6 +2,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "engine/engine.h"
+
 SpriteRenderer::SpriteRenderer(Shader SpriteShader, Camera2D * Camera) : SpriteShader(SpriteShader), Camera(Camera) {
     Initialize();
 }
@@ -9,19 +11,21 @@ SpriteRenderer::SpriteRenderer(Shader SpriteShader, Camera2D * Camera) : SpriteS
 void SpriteRenderer::Draw(Sprite & S) {
     SpriteShader.Use();
 
+    float Factor = Engine::SCALE_FACTOR;
+
     // Create Model Matrix
     glm::mat4 Model = glm::mat4(1.0f);
     // Translate sprite based on its center
-    glm::vec2 SpriteCenter = glm::vec2(S.Transform.Position.x - S.SpriteTexture.Width / 2.0f, S.Transform.Position.y - S.SpriteTexture.Height / 2.0f);
+    glm::vec2 SpriteCenter = glm::vec2(S.Transform.Position.x - (S.SpriteTexture.Width * Factor) / 2.0f, S.Transform.Position.y - (S.SpriteTexture.Height * Factor) / 2.0f);
     Model = glm::translate(Model, glm::vec3(SpriteCenter, 0.0f));
 
     // Apply rotation from sprite's center instead of top left
-    Model = glm::translate(Model, glm::vec3(S.SpriteTexture.Width * 0.5f, S.SpriteTexture.Height * 0.5f, 0.0f));
+    Model = glm::translate(Model, glm::vec3((S.SpriteTexture.Width * Factor) * 0.5f, (S.SpriteTexture.Height * Factor) * 0.5f, 0.0f));
     Model = glm::rotate(Model, glm::radians(S.Transform.Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-    Model = glm::translate(Model, glm::vec3(S.SpriteTexture.Width * -0.5f, S.SpriteTexture.Height * -0.5f, 0.0f));
+    Model = glm::translate(Model, glm::vec3((S.SpriteTexture.Width * Factor) * -0.5f, (S.SpriteTexture.Height * Factor) * -0.5f, 0.0f));
 
     // Scale
-    Model = glm::scale(Model, glm::vec3(S.SpriteTexture.Width, S.SpriteTexture.Height, 1.0f));
+    Model = glm::scale(Model, glm::vec3((S.SpriteTexture.Width * Factor) * S.Transform.Scale.x, (S.SpriteTexture.Height * Factor) * S.Transform.Scale.y, 1.0f));
 
     SpriteShader.SetMat4("ModelMatrix", Model);
     SpriteShader.SetMat4("ViewMatrix", Camera->GetViewMatrix());

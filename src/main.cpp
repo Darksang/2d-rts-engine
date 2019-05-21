@@ -19,12 +19,14 @@
 
 #include "stb_image.h"
 
-#include "engine/shader.h"
-#include "engine/texture.h"
-#include "engine/camera2d.h"
 #include "engine/game_object.h"
-#include "engine/transform2d.h"
+#include "engine/engine.h"
+#include "engine/shader.h"
 #include "engine/sprite_renderer.h"
+#include "engine/texture.h"
+#include "engine/transform2d.h"
+
+#include "engine/debug_draw.h"
 
 const float SCREEN_WIDTH = 1024.0f;
 const float SCREEN_HEIGHT = 768.0f;
@@ -89,13 +91,17 @@ int main(int argc, char * argv[]) {
    ImGui_ImplOpenGL3_Init(glsl_version);
 
    // Box2D
-   b2Vec2 Gravity(0.0f, -10.0f);
+   b2Vec2 Gravity(0.0f, 0.0f); // Zero gravity, why only want collision detection
    b2World World(Gravity);
 
    Shader SpriteShader("resources/shaders/vertex/sprite.glsl", "resources/shaders/fragment/sprite.glsl");
 
    // Camera
-   Camera2D Camera(SCREEN_WIDTH, SCREEN_HEIGHT);
+   Camera2D Camera(SCREEN_WIDTH * Engine::SCALE_FACTOR, SCREEN_HEIGHT * Engine::SCALE_FACTOR);
+
+   /* Debug Renderer
+   DebugDraw DebugRenderer;
+   DebugRenderer.Initialize(&Camera); */
    
    // Sprite Renderer
    SpriteRenderer Renderer(SpriteShader, &Camera);
@@ -103,12 +109,12 @@ int main(int argc, char * argv[]) {
    Texture PlayerTexture("resources/sprites/Laharl.png", true);
 
    Sprite Player(PlayerTexture);
-   Player.Transform.Position.x = 20.0f;
+   Player.Transform.Position.x = 0.0f;
    Player.Transform.Rotation = 45.0f;
 
    Sprite Player2(PlayerTexture);
-   Player2.Transform.Position.x = 67.0f;
-   Player2.Transform.Position.y = -100.0f;
+   Player2.Transform.Position.x = 0.0f;
+   Player2.Transform.Position.y = 0.0f;
 
    double DeltaTime = 0.0f;
    double LastFrameTime = glfwGetTime();
@@ -127,16 +133,16 @@ int main(int argc, char * argv[]) {
          Camera.ZoomOut(-MouseWheelDelta.y * 0.1f);
 
       if (glfwGetKey(Window, GLFW_KEY_A) == GLFW_PRESS)
-         Camera.Translate(glm::vec2(-100.0f, 0.0f) * static_cast<float>(DeltaTime));
+         Camera.Translate(glm::vec2(-5.0f, 0.0f) * static_cast<float>(DeltaTime));
       
       if (glfwGetKey(Window, GLFW_KEY_D) == GLFW_PRESS)
-         Camera.Translate(glm::vec2(100.0f, 0.0f) * static_cast<float>(DeltaTime));
+         Camera.Translate(glm::vec2(5.0f, 0.0f) * static_cast<float>(DeltaTime));
 
       if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS)
-         Camera.Translate(glm::vec2(0.0f, -100.0f) * static_cast<float>(DeltaTime));
+         Camera.Translate(glm::vec2(0.0f, -5.0f) * static_cast<float>(DeltaTime));
 
       if (glfwGetKey(Window, GLFW_KEY_S) == GLFW_PRESS)
-         Camera.Translate(glm::vec2(0.0f, 100.0f) * static_cast<float>(DeltaTime));
+         Camera.Translate(glm::vec2(0.0f, 5.0f) * static_cast<float>(DeltaTime));
 
       // Test: Move sprite around world using mouse
       if (glfwGetMouseButton(Window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
@@ -186,7 +192,7 @@ int main(int argc, char * argv[]) {
          ImGui::Text("Frame Count: %i", FrameCount);
          ImGui::Text("Mouse Screen Position: %.0fx %.0fy", MousePosition.x, MousePosition.y);
          glm::vec2 MouseWorldPos = Camera.ScreenToWorld(MousePosition);
-         ImGui::Text("Mouse World Position: %.0fx %.0fy", MouseWorldPos.x, MouseWorldPos.y);
+         ImGui::Text("Mouse World Position: %.4fx %.4fy", MouseWorldPos.x, MouseWorldPos.y);
          ImGui::End();
       }
 
@@ -220,6 +226,12 @@ int main(int argc, char * argv[]) {
       Renderer.Draw(Player);
       Renderer.Draw(Player2);
 
+      /*b2Color c;
+		c.Set(0.0f, 1.0f, 0.0f);
+      DebugRenderer.DrawPoint(b2Vec2(1000.0f, 500.0f), 3.0f, c);
+
+      DebugRenderer.Render(); */
+
       // Render ImGui
       ImGui::Render();
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -231,6 +243,8 @@ int main(int argc, char * argv[]) {
 
       FrameCount++;
    }
+
+   //DebugRenderer.Destroy();
 
    ImGui_ImplOpenGL3_Shutdown();
    ImGui_ImplGlfw_Shutdown();
