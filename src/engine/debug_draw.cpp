@@ -1,6 +1,6 @@
 #include "engine/debug_draw.h"
 
-// Struct used to render points in a batch (512 points with a single draw call)
+// Struct used to render points in a batch (up to 512 points with a single draw call)
 struct RenderPoints {
 
     RenderPoints() { }
@@ -99,7 +99,7 @@ struct RenderPoints {
     GLuint VBO[3];
 };
 
-// Struct used to render lines in a batch (512 lines with a single draw call)
+// Struct used to render lines in a batch (up to 512 lines with a single draw call)
 struct RenderLines {
 
     RenderLines() { }
@@ -186,7 +186,7 @@ struct RenderLines {
     GLuint VBO[2];
 };
 
-// Struct used to render triangles in a batch (512 triangles with a single draw call)
+// Struct used to render triangles in a batch (up to 512 triangles with a single draw call)
 struct RenderTriangles {
 
     RenderTriangles() { }
@@ -314,13 +314,9 @@ void DebugDraw::Destroy() {
     Triangles = 0;
 }
 
-void DebugDraw::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) {
+void DebugDraw::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) { }
 
-}
-
-void DebugDraw::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) {
-
-}
+void DebugDraw::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) { }
 
 void DebugDraw::DrawCircle(const glm::vec2 & Center, float Radius, const glm::vec3 & Color) {
     DrawCircle(b2Vec2(Center.x, Center.y), static_cast<float32>(Radius), b2Color(Color.x, Color.y, Color.z));
@@ -351,9 +347,7 @@ void DebugDraw::DrawCircle(const b2Vec2& center, float32 radius, const b2Color& 
     }
 }
 
-void DebugDraw::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color) {
-
-}
+void DebugDraw::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color) { }
 
 void DebugDraw::DrawSegment(const glm::vec2 & P1, const glm::vec2 & P2, const glm::vec3 & Color) {
     DrawSegment(b2Vec2(P1.x, P1.y), b2Vec2(P2.x, P2.y), b2Color(Color.x, Color.y, Color.z));
@@ -364,9 +358,7 @@ void DebugDraw::DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& c
     Lines->Vertex(p2, color);
 }
 
-void DebugDraw::DrawTransform(const b2Transform& xf) {
-
-}
+void DebugDraw::DrawTransform(const b2Transform& xf) { }
 
 void DebugDraw::DrawPoint(const glm::vec2 & P, const glm::vec3 & Color, float Size) {
     DrawPoint(b2Vec2(P.x, P.y), Size, b2Color(Color.x, Color.y, Color.z));

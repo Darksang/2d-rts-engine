@@ -74,7 +74,6 @@ $RECYCLE.BIN/
 *.userprefs
 
 # Build results
-[Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
