@@ -30,8 +30,9 @@ class DebugDraw : public b2Draw {
 
         void DrawTransform(const b2Transform& xf) override;
 
+        void DrawPoint(const glm::vec2 & P, const glm::vec3 & Color, float Size);
         void DrawPoint(const b2Vec2& p, float32 size, const b2Color& color) override;
-
+    
         void Render();
 
     private:

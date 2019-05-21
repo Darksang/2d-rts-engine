@@ -6,7 +6,7 @@
 
 class Camera2D {
     public:
-        Camera2D(float ScreenWidth, float ScreenHeight);
+        Camera2D(float ScreenWidth, float ScreenHeight, float Scale);
 
         // Position of the camera
         glm::vec2 Position;
@@ -29,6 +29,7 @@ class Camera2D {
         void ClampZoom(float Value);
 
         float ViewportWidth, ViewportHeight;
+        float ScaleFactor;
         
         glm::mat4 ProjectionMatrix;
         glm::mat4 ViewMatrix;

@@ -94,26 +94,25 @@ int main(int argc, char * argv[]) {
    b2Vec2 Gravity(0.0f, 0.0f); // Zero gravity, why only want collision detection
    b2World World(Gravity);
 
-   Shader SpriteShader("resources/shaders/vertex/sprite.glsl", "resources/shaders/fragment/sprite.glsl");
-
    // Camera
-   Camera2D Camera(SCREEN_WIDTH * Engine::SCALE_FACTOR, SCREEN_HEIGHT * Engine::SCALE_FACTOR);
+   Camera2D Camera(SCREEN_WIDTH, SCREEN_HEIGHT, Engine::SCALE_FACTOR);
 
-   /* Debug Renderer
+   // Debug Renderer
    DebugDraw DebugRenderer;
-   DebugRenderer.Initialize(&Camera); */
-   
+   DebugRenderer.Initialize(&Camera);
+
    // Sprite Renderer
+   Shader SpriteShader("resources/shaders/vertex/sprite.glsl", "resources/shaders/fragment/sprite.glsl");
    SpriteRenderer Renderer(SpriteShader, &Camera);
 
    Texture PlayerTexture("resources/sprites/Laharl.png", true);
 
    Sprite Player(PlayerTexture);
-   Player.Transform.Position.x = 0.0f;
+   Player.Transform.Position.x = -4.0f;
    Player.Transform.Rotation = 45.0f;
 
    Sprite Player2(PlayerTexture);
-   Player2.Transform.Position.x = 0.0f;
+   Player2.Transform.Position.x = 4.0f;
    Player2.Transform.Position.y = 0.0f;
 
    double DeltaTime = 0.0f;
@@ -226,11 +225,9 @@ int main(int argc, char * argv[]) {
       Renderer.Draw(Player);
       Renderer.Draw(Player2);
 
-      /*b2Color c;
-		c.Set(0.0f, 1.0f, 0.0f);
-      DebugRenderer.DrawPoint(b2Vec2(1000.0f, 500.0f), 3.0f, c);
+      DebugRenderer.DrawPoint(glm::vec2(-3.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 3.0f);
 
-      DebugRenderer.Render(); */
+      DebugRenderer.Render();
 
       // Render ImGui
       ImGui::Render();
@@ -244,7 +241,7 @@ int main(int argc, char * argv[]) {
       FrameCount++;
    }
 
-   //DebugRenderer.Destroy();
+   DebugRenderer.Destroy();
 
    ImGui_ImplOpenGL3_Shutdown();
    ImGui_ImplGlfw_Shutdown();

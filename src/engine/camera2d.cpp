@@ -1,8 +1,9 @@
 #include "engine/camera2d.h"
 
-Camera2D::Camera2D(float ScreenWidth, float ScreenHeight) : Position(0.0f, 0.0f), Zoom(1.0f), ViewMatrix(1.0f), ProjectionMatrix(1.0f) {
-    ViewportWidth = ScreenWidth;
-    ViewportHeight = ScreenHeight;
+Camera2D::Camera2D(float ScreenWidth, float ScreenHeight, float Scale) : Position(0.0f, 0.0f), Zoom(1.0f), ViewMatrix(1.0f), ProjectionMatrix(1.0f) {
+    ScaleFactor = Scale;
+    ViewportWidth = ScreenWidth * ScaleFactor;
+    ViewportHeight = ScreenHeight * ScaleFactor;
 
     // Left, Right, Top, Bottom, Near, Far
     ProjectionMatrix = glm::ortho(0.0f, ViewportWidth, ViewportHeight, 0.0f);
@@ -28,7 +29,7 @@ void Camera2D::ZoomOut(float Zoom) {
 }
 
 glm::vec2 Camera2D::ScreenToWorld(const glm::vec2 & Point) {
-    glm::vec2 Result = glm::inverse(GetViewMatrix()) * glm::vec4(Point.x * 0.01, Point.y * 0.01, 1.0f, 1.0f);
+    glm::vec2 Result = glm::inverse(GetViewMatrix()) * glm::vec4(Point.x * ScaleFactor, Point.y * ScaleFactor, 1.0f, 1.0f);
     return glm::vec2(Result.x, Result.y);
 }
 

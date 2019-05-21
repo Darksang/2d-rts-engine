@@ -145,6 +145,10 @@ void DebugDraw::DrawTransform(const b2Transform& xf) {
 
 }
 
+void DebugDraw::DrawPoint(const glm::vec2 & P, const glm::vec3 & Color, float Size) {
+    DrawPoint(b2Vec2(P.x, P.y), Size, b2Color(Color.x, Color.y, Color.z));
+}
+
 void DebugDraw::DrawPoint(const b2Vec2& p, float32 size, const b2Color& color) {
     Points->Vertex(p, color, size);
 }
