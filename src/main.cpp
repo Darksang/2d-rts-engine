@@ -108,12 +108,33 @@ int main(int argc, char * argv[]) {
    Texture PlayerTexture("resources/sprites/Laharl.png", true);
 
    Sprite Player(PlayerTexture);
-   Player.Transform.Position.x = -4.0f;
-   Player.Transform.Rotation = 45.0f;
+   Player.Transform.Position.x = 0.0f;
 
    Sprite Player2(PlayerTexture);
    Player2.Transform.Position.x = 4.0f;
    Player2.Transform.Position.y = 0.0f;
+
+   // Create a body for the sprite
+   b2BodyDef BodyDef;
+   BodyDef.type = b2_dynamicBody;
+   BodyDef.position.Set(Player.Transform.Position.x, Player.Transform.Position.y);
+   b2Body * Body = World.CreateBody(&BodyDef);
+
+   b2PolygonShape Box;
+   Box.SetAsBox((Player.SpriteTexture.Width * Engine::SCALE_FACTOR) * 0.5f, (Player.SpriteTexture.Height * Engine::SCALE_FACTOR) * 0.5f);
+   b2FixtureDef FixtureDef;
+   FixtureDef.shape = &Box;
+   FixtureDef.density = 1.0f;
+   FixtureDef.friction = 0.3f;
+   
+   Body->CreateFixture(&FixtureDef);
+
+   // Set Debug Draw for Box2D
+   uint32 flags = 0x0001;
+   DebugRenderer.AppendFlags(flags);
+   World.SetDebugDraw(&DebugRenderer);
+
+   float32 timeStep = 1.0f / 60.0f;
 
    double DeltaTime = 0.0f;
    double LastFrameTime = glfwGetTime();
@@ -218,18 +239,24 @@ int main(int argc, char * argv[]) {
          ImGui::End();
       }
 
+      World.Step(timeStep, 6, 2);
+
+      Body->SetTransform(b2Vec2(Player.Transform.Position.x, Player.Transform.Position.y), 0.0f);
+
       // Render Scene
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT);
 
       Renderer.Draw(Player);
       Renderer.Draw(Player2);
-      
-      DebugRenderer.DrawCircle(glm::vec2(1.0f, 0.0f), 2.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-      DebugRenderer.DrawPoint(glm::vec2(1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 4.0f);
-      DebugRenderer.DrawSegment(glm::vec2(1.0f, 0.0f), glm::vec2(3.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
+      //DebugRenderer.DrawCircle(glm::vec2(1.0f, 0.0f), 2.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+      //DebugRenderer.DrawPoint(glm::vec2(1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 4.0f);
+      //DebugRenderer.DrawSegment(glm::vec2(1.0f, 0.0f), glm::vec2(3.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+      World.DrawDebugData();
       DebugRenderer.Render();
+      //DebugRenderer.Render();
 
       // Render ImGui
       ImGui::Render();

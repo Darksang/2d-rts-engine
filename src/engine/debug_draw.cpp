@@ -314,9 +314,35 @@ void DebugDraw::Destroy() {
     Triangles = 0;
 }
 
-void DebugDraw::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) { }
+void DebugDraw::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) { 
+    b2Vec2 p1 = vertices[vertexCount - 1];
 
-void DebugDraw::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) { }
+    for (int32 i = 0; i < vertexCount; i++) {
+        b2Vec2 p2 = vertices[i];
+        Lines->Vertex(p1, color);
+        Lines->Vertex(p2, color);
+        p1 = p2;
+    }
+}
+
+void DebugDraw::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) { 
+    b2Color fillColor(0.5f * color.r, 0.5f * color.g, 0.5f * color.b);
+
+    for (int32 i = 0; i < vertexCount - 1; i++) {
+        Triangles->Vertex(vertices[0], fillColor);
+        Triangles->Vertex(vertices[i], fillColor);
+        Triangles->Vertex(vertices[i + 1], fillColor);
+    }
+
+    b2Vec2 p1 = vertices[vertexCount - 1];
+
+    for (int32 i = 0; i < vertexCount; i++) {
+        b2Vec2 p2 = vertices[i];
+        Lines->Vertex(p1, color);
+        Lines->Vertex(p2, color);
+        p1 = p2;
+    }
+}
 
 void DebugDraw::DrawCircle(const glm::vec2 & Center, float Radius, const glm::vec3 & Color) {
     DrawCircle(b2Vec2(Center.x, Center.y), static_cast<float32>(Radius), b2Color(Color.x, Color.y, Color.z));
@@ -347,7 +373,48 @@ void DebugDraw::DrawCircle(const b2Vec2& center, float32 radius, const b2Color& 
     }
 }
 
-void DebugDraw::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color) { }
+void DebugDraw::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color) {
+    const float32 k_segments = 16.0f;
+    const float32 k_increment = 2.0f * b2_pi / k_segments;
+
+    float32 sinInc = sinf(k_increment);
+    float32 cosInc = cosf(k_increment);
+
+    b2Vec2 v0 = center;
+    b2Vec2 r1(cosInc, sinInc);
+    b2Vec2 v1 = center + radius * r1;
+	b2Color fillColor(0.5f * color.r, 0.5f * color.g, 0.5f * color.b, 0.5f);
+
+    for (int32 i = 0; i < k_segments; ++i) {
+        b2Vec2 r2;
+        r2.x = cosInc * r1.x - sinInc * r1.y;
+        r2.y = sinInc * r1.x + cosInc * r1.y;
+		b2Vec2 v2 = center + radius * r2;
+		Triangles->Vertex(v0, fillColor);
+        Triangles->Vertex(v1, fillColor);
+        Triangles->Vertex(v2, fillColor);
+        r1 = r2;
+        v1 = v2;
+	}
+
+    r1.Set(1.0f, 0.0f);
+    v1 = center + radius * r1;
+	for (int32 i = 0; i < k_segments; ++i)
+	{
+        b2Vec2 r2;
+        r2.x = cosInc * r1.x - sinInc * r1.y;
+        r2.y = sinInc * r1.x + cosInc * r1.y;
+		b2Vec2 v2 = center + radius * r2;
+        Lines->Vertex(v1, color);
+        Lines->Vertex(v2, color);
+        r1 = r2;
+        v1 = v2;
+	}
+
+	b2Vec2 p = center + radius * axis;
+	Lines->Vertex(center, color);
+	Lines->Vertex(p, color);
+}
 
 void DebugDraw::DrawSegment(const glm::vec2 & P1, const glm::vec2 & P2, const glm::vec3 & Color) {
     DrawSegment(b2Vec2(P1.x, P1.y), b2Vec2(P2.x, P2.y), b2Color(Color.x, Color.y, Color.z));
@@ -358,7 +425,20 @@ void DebugDraw::DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& c
     Lines->Vertex(p2, color);
 }
 
-void DebugDraw::DrawTransform(const b2Transform& xf) { }
+void DebugDraw::DrawTransform(const b2Transform& xf) {
+    const float32 k_axisScale = 0.4f;
+    b2Color red(1.0f, 0.0f, 0.0f);
+    b2Color green(0.0f, 1.0f, 0.0f);
+	b2Vec2 p1 = xf.p, p2;
+
+	Lines->Vertex(p1, red);
+	p2 = p1 + k_axisScale * xf.q.GetXAxis();
+	Lines->Vertex(p2, red);
+
+	Lines->Vertex(p1, green);
+	p2 = p1 + k_axisScale * xf.q.GetYAxis();
+	Lines->Vertex(p2, green);
+ }
 
 void DebugDraw::DrawPoint(const glm::vec2 & P, const glm::vec3 & Color, float Size) {
     DrawPoint(b2Vec2(P.x, P.y), Size, b2Color(Color.x, Color.y, Color.z));
