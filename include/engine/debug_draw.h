@@ -22,6 +22,7 @@ class DebugDraw : public b2Draw {
 
         void DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) override;
 
+        void DrawCircle(const glm::vec2 & Center, float Radius, const glm::vec3 & Color);
         void DrawCircle(const b2Vec2& center, float32 radius, const b2Color& color) override;
 
         void DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color) override;
@@ -41,6 +42,7 @@ class DebugDraw : public b2Draw {
 
         RenderPoints * Points;
         RenderLines * Lines;
+        RenderTriangles * Triangles;
 };
 
 #endif
