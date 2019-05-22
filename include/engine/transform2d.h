@@ -1,5 +1,5 @@
-#ifndef TRANSFORM_H
-#define TRANSFORM_H
+#ifndef TRANSFORM2D_H
+#define TRANSFORM2D_H
 
 #include <glm/glm.hpp>
 

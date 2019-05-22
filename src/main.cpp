@@ -19,7 +19,6 @@
 
 #include "stb_image.h"
 
-#include "engine/game_object.h"
 #include "engine/engine.h"
 #include "engine/shader.h"
 #include "engine/sprite_renderer.h"
@@ -92,7 +91,7 @@ int main(int argc, char * argv[]) {
 
    // Box2D
    b2Vec2 Gravity(0.0f, 0.0f); // Zero gravity, why only want collision detection
-   b2World World(Gravity);
+   b2World PhysicsWorld(Gravity);
 
    // Camera
    Camera2D Camera(SCREEN_WIDTH, SCREEN_HEIGHT, Engine::SCALE_FACTOR);
@@ -118,7 +117,7 @@ int main(int argc, char * argv[]) {
    b2BodyDef BodyDef;
    BodyDef.type = b2_dynamicBody;
    BodyDef.position.Set(Player.Transform.Position.x, Player.Transform.Position.y);
-   b2Body * Body = World.CreateBody(&BodyDef);
+   b2Body * Body = PhysicsWorld.CreateBody(&BodyDef);
 
    b2PolygonShape Box;
    Box.SetAsBox((Player.SpriteTexture.Width * Engine::SCALE_FACTOR) * 0.5f, (Player.SpriteTexture.Height * Engine::SCALE_FACTOR) * 0.5f);
@@ -132,7 +131,7 @@ int main(int argc, char * argv[]) {
    // Set Debug Draw for Box2D
    uint32 flags = 0x0001;
    DebugRenderer.AppendFlags(flags);
-   World.SetDebugDraw(&DebugRenderer);
+   PhysicsWorld.SetDebugDraw(&DebugRenderer);
 
    float32 timeStep = 1.0f / 60.0f;
 
@@ -239,9 +238,9 @@ int main(int argc, char * argv[]) {
          ImGui::End();
       }
 
-      World.Step(timeStep, 6, 2);
+      PhysicsWorld.Step(timeStep, 6, 2);
 
-      Body->SetTransform(b2Vec2(Player.Transform.Position.x, Player.Transform.Position.y), 0.0f);
+      Body->SetTransform(b2Vec2(Player.Transform.Position.x, Player.Transform.Position.y), glm::radians(Player.Transform.Rotation));
 
       // Render Scene
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -254,7 +253,7 @@ int main(int argc, char * argv[]) {
       //DebugRenderer.DrawPoint(glm::vec2(1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 4.0f);
       //DebugRenderer.DrawSegment(glm::vec2(1.0f, 0.0f), glm::vec2(3.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-      World.DrawDebugData();
+      PhysicsWorld.DrawDebugData();
       DebugRenderer.Render();
       //DebugRenderer.Render();
 

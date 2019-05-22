@@ -21,7 +21,6 @@ set(SRC ${SRC_DIR}/main.cpp
         ${SRC_DIR}/engine/camera2d.cpp
         ${SRC_DIR}/engine/debug_draw.cpp
         ${SRC_DIR}/engine/engine.cpp
-        ${SRC_DIR}/engine/game_object.cpp
         ${SRC_DIR}/engine/shader.cpp
         ${SRC_DIR}/engine/sprite_renderer.cpp
         ${SRC_DIR}/engine/texture.cpp
