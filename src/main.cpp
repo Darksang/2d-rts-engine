@@ -27,6 +27,21 @@
 
 #include "engine/debug_draw.h"
 
+// #### ESC TEST
+#include "engine/ecs/ECS.h"
+ECS_TYPE_IMPLEMENTATION;
+
+// Components
+#include "engine/components/physics_body.h"
+#include "engine/components/transform.h"
+#include "engine/components/sprite.h"
+
+// Systems
+#include "engine/systems/render_system.h"
+#include "engine/systems/debug_system.h"
+#include "engine/systems/physics_system.h"
+// ####
+
 const float SCREEN_WIDTH = 1024.0f;
 const float SCREEN_HEIGHT = 768.0f;
 
@@ -90,7 +105,7 @@ int main(int argc, char * argv[]) {
    ImGui_ImplOpenGL3_Init(glsl_version);
 
    // Box2D
-   b2Vec2 Gravity(0.0f, 0.0f); // Zero gravity, why only want collision detection
+   b2Vec2 Gravity(0.0f, 0.0f); // Zero gravity, we only want collision detection
    b2World PhysicsWorld(Gravity);
 
    // Camera
@@ -104,36 +119,36 @@ int main(int argc, char * argv[]) {
    Shader SpriteShader("resources/shaders/vertex/sprite.glsl", "resources/shaders/fragment/sprite.glsl");
    SpriteRenderer Renderer(SpriteShader, &Camera);
 
+   // #### ESC TEST
+   ECS::World * EntityWorld = ECS::World::createWorld();
+
+   EntityWorld->registerSystem(new PhysicsSystem(&PhysicsWorld));
+   EntityWorld->registerSystem(new DebugSystem(&PhysicsWorld, &DebugRenderer));
+   EntityWorld->registerSystem(new RenderSystem(&Renderer));
+
+   // Test entity
+   ECS::Entity * Entity = EntityWorld->create();
+   Entity->assign<Transform>();
    Texture PlayerTexture("resources/sprites/Laharl.png", true);
+   Entity->assign<Sprite>(PlayerTexture);
 
-   Sprite Player(PlayerTexture);
-   Player.Transform.Position.x = 0.0f;
-
-   Sprite Player2(PlayerTexture);
-   Player2.Transform.Position.x = 4.0f;
-   Player2.Transform.Position.y = 0.0f;
-
-   // Create a body for the sprite
    b2BodyDef BodyDef;
    BodyDef.type = b2_dynamicBody;
-   BodyDef.position.Set(Player.Transform.Position.x, Player.Transform.Position.y);
+   BodyDef.position.Set(Entity->get<Transform>()->Position.x, Entity->get<Transform>()->Position.x);
    b2Body * Body = PhysicsWorld.CreateBody(&BodyDef);
 
    b2PolygonShape Box;
-   Box.SetAsBox((Player.SpriteTexture.Width * Engine::SCALE_FACTOR) * 0.5f, (Player.SpriteTexture.Height * Engine::SCALE_FACTOR) * 0.5f);
+   Box.SetAsBox(Entity->get<Sprite>()->SpriteTexture.Width * Engine::SCALE_FACTOR * 0.5f, Entity->get<Sprite>()->SpriteTexture.Height * Engine::SCALE_FACTOR * 0.5f);
    b2FixtureDef FixtureDef;
    FixtureDef.shape = &Box;
    FixtureDef.density = 1.0f;
    FixtureDef.friction = 0.3f;
-   
+
    Body->CreateFixture(&FixtureDef);
 
-   // Set Debug Draw for Box2D
-   uint32 flags = 0x0001;
-   DebugRenderer.AppendFlags(flags);
-   PhysicsWorld.SetDebugDraw(&DebugRenderer);
+   Entity->assign<PhysicsBody>(Body);
 
-   float32 timeStep = 1.0f / 60.0f;
+   // ####
 
    double DeltaTime = 0.0f;
    double LastFrameTime = glfwGetTime();
@@ -166,7 +181,7 @@ int main(int argc, char * argv[]) {
       // Test: Move sprite around world using mouse
       if (glfwGetMouseButton(Window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
          glm::vec2 NewPos = Camera.ScreenToWorld(MousePosition);
-         Player.Transform.Position = NewPos;
+         Entity->get<Transform>()->Position = NewPos;
       }
 
       // IMGUI New Frame Prep
@@ -220,42 +235,39 @@ int main(int argc, char * argv[]) {
          ImGui::Begin("Sprite");
          if (ImGui::CollapsingHeader("Transform")) {
             if (ImGui::TreeNode("Position")) {
-               ImGui::Text("Position X: %f", Player.Transform.Position.x);
-               ImGui::Text("Position Y: %f", Player.Transform.Position.y);
+               ImGui::Text("Position X: %f", Entity->get<Transform>()->Position.x);
+               ImGui::Text("Position X: %f", Entity->get<Transform>()->Position.y);
 
                ImGui::TreePop();
             }
 
             if (ImGui::TreeNode("Scale")) {
-               ImGui::Text("Scale X: %f", Player.Transform.Scale.x);
-               ImGui::Text("Scale Y: %f", Player.Transform.Scale.y);
+               ImGui::Text("Position X: %f", Entity->get<Transform>()->Scale.x);
+               ImGui::Text("Position X: %f", Entity->get<Transform>()->Scale.y);
 
                ImGui::TreePop();
             }
 
-            ImGui::SliderFloat("Rotation", &Player.Transform.Rotation, 0.0f, 360.0f);
+            ImGui::SliderFloat("Rotation", &Entity->get<Transform>()->Rotation, 0.0f, 360.0f);
          }
          ImGui::End();
       }
-
-      PhysicsWorld.Step(timeStep, 6, 2);
-
-      Body->SetTransform(b2Vec2(Player.Transform.Position.x, Player.Transform.Position.y), glm::radians(Player.Transform.Rotation));
 
       // Render Scene
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT);
 
-      Renderer.Draw(Player);
-      Renderer.Draw(Player2);
+      EntityWorld->tick(static_cast<float>(DeltaTime));
+
+      /*Renderer.Draw(Player);
+      Renderer.Draw(Player2); */
 
       //DebugRenderer.DrawCircle(glm::vec2(1.0f, 0.0f), 2.0f, glm::vec3(0.0f, 1.0f, 0.0f));
       //DebugRenderer.DrawPoint(glm::vec2(1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 4.0f);
       //DebugRenderer.DrawSegment(glm::vec2(1.0f, 0.0f), glm::vec2(3.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-      PhysicsWorld.DrawDebugData();
-      DebugRenderer.Render();
-      //DebugRenderer.Render();
+      /*PhysicsWorld.DrawDebugData();
+      DebugRenderer.Render(); */
 
       // Render ImGui
       ImGui::Render();
@@ -269,6 +281,8 @@ int main(int argc, char * argv[]) {
       FrameCount++;
    }
 
+   EntityWorld->cleanup();
+   EntityWorld->destroyWorld();
    DebugRenderer.Destroy();
 
    ImGui_ImplOpenGL3_Shutdown();
