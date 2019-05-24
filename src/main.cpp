@@ -24,6 +24,7 @@
 #include "engine/sprite_renderer.h"
 #include "engine/texture.h"
 #include "engine/transform2d.h"
+#include "engine/input_state.h"
 
 #include "engine/debug_draw.h"
 
@@ -32,14 +33,15 @@
 ECS_TYPE_IMPLEMENTATION;
 
 // Components
+#include "engine/components/input.h"
 #include "engine/components/physics_body.h"
-#include "engine/components/transform.h"
 #include "engine/components/sprite.h"
+#include "engine/components/transform.h"
 
 // Systems
-#include "engine/systems/render_system.h"
 #include "engine/systems/debug_system.h"
 #include "engine/systems/physics_system.h"
+#include "engine/systems/render_system.h"
 // ####
 
 const float SCREEN_WIDTH = 1024.0f;
@@ -145,10 +147,16 @@ int main(int argc, char * argv[]) {
    FixtureDef.friction = 0.3f;
 
    Body->CreateFixture(&FixtureDef);
+   Body->SetUserData(Entity);
 
    Entity->assign<PhysicsBody>(Body);
 
+   // Input Entity
+   ECS::Entity * InputManager = EntityWorld->create();
+   InputManager->assign<Input>();
+
    // ####
+   InputState InputTest(Window);
 
    double DeltaTime = 0.0f;
    double LastFrameTime = glfwGetTime();
@@ -160,6 +168,15 @@ int main(int argc, char * argv[]) {
       LastFrameTime = CurrentTime;
 
       glfwPollEvents();
+
+      double InputPollStart = glfwGetTime();
+      InputTest.Update();
+      double InputPollEnd = glfwGetTime();
+
+      std::cout << "Input Polling Time (ms): " << (InputPollEnd - InputPollStart) * 1000.0f << std::endl;
+
+      InputManager->get<Input>()->MousePosition = MousePosition;
+      InputManager->get<Input>()->MouseWheelDelta = MouseWheelDelta;
 
       if (MouseWheelDelta.y > 0.0f)
          Camera.ZoomIn(MouseWheelDelta.y * 0.1f);
