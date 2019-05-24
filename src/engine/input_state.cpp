@@ -9,31 +9,63 @@ KEY_RIGHT, KEY_LEFT, KEY_DOWN, KEY_UP, KEY_PAGE_UP, KEY_PAGE_DOWN, KEY_HOME, KEY
 KEY_F2, KEY_F3, KEY_F4, KEY_F5, KEY_F6, KEY_F7, KEY_F8, KEY_F9, KEY_F10, KEY_F11, KEY_F12, KEY_LEFT_SHIFT, KEY_LEFT_CONTROL, KEY_LEFT_ALT, KEY_LEFT_SUPER, KEY_RIGHT_SHIFT,
 KEY_RIGHT_CONTROL, KEY_RIGHT_ALT, KEY_RIGHT_SUPER, KEY_MENU };
 
+const MouseButton InputState::AllMouseButtons[] = { MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_4,
+MOUSE_BUTTON_5, MOUSE_BUTTON_6, MOUSE_BUTTON_7, MOUSE_BUTTON_8 };
+
 InputState::InputState(GLFWwindow * Window) : Window(Window) {
-    memset(States, KeyState::RELEASED, sizeof(States));
+    memset(KeyboardStates, KeyState::RELEASED, sizeof(KeyboardStates));
+    memset(MouseStates, KeyState::RELEASED, sizeof(MouseStates));
 }
 
 void InputState::Update() {
+    // Reset needed stuff
+    MouseWheelDelta = 0.0f;
+
+    // Process Keyboard
     for (const auto Key : AllKeys) {
         bool IsKeyDown = glfwGetKey(Window, Key) == GLFW_PRESS;
 
-        KeyState LastState = States[Key];
+        KeyState LastState = KeyboardStates[Key];
 
         if (IsKeyDown && LastState == KeyState::JUST_DOWN)
-            States[Key] = KeyState::DOWN;
+            KeyboardStates[Key] = KeyState::DOWN;
         else if (IsKeyDown && (LastState == KeyState::RELEASED || LastState == KeyState::JUST_RELEASED))
-            States[Key] = KeyState::JUST_DOWN;
+            KeyboardStates[Key] = KeyState::JUST_DOWN;
         else if (!IsKeyDown && (LastState == KeyState::DOWN || LastState == KeyState::JUST_DOWN))
-            States[Key] = KeyState::JUST_RELEASED;
+            KeyboardStates[Key] = KeyState::JUST_RELEASED;
         else if (!IsKeyDown && LastState == KeyState::JUST_RELEASED)
-            States[Key] = KeyState::RELEASED;
+            KeyboardStates[Key] = KeyState::RELEASED;
+    }
+
+    // Process Mouse Buttons
+    for (const auto Button : AllMouseButtons) {
+        bool IsButtonDown = glfwGetMouseButton(Window, Button) == GLFW_PRESS;
+
+        KeyState LastState = MouseStates[Button];
+
+        if (IsButtonDown && LastState == KeyState::JUST_DOWN)
+            MouseStates[Button] = KeyState::DOWN;
+        else if (IsButtonDown && (LastState == KeyState::RELEASED || LastState == KeyState::JUST_RELEASED))
+            MouseStates[Button] = KeyState::JUST_DOWN;
+        else if (!IsButtonDown && (LastState == KeyState::DOWN || LastState == KeyState::JUST_DOWN))
+            MouseStates[Button] = KeyState::JUST_RELEASED;
+        else if (!IsButtonDown && LastState == KeyState::JUST_RELEASED)
+            MouseStates[Button] = KeyState::RELEASED;
     }
 }
 
 bool InputState::IsKeyDown(Key K) {
-    return (States[K] == KeyState::DOWN || States[K] == KeyState::JUST_DOWN);
+    return (KeyboardStates[K] == KeyState::DOWN || KeyboardStates[K] == KeyState::JUST_DOWN);
 }
 
 bool InputState::IsKeyJustDown(Key K) {
-    return States[K] == KeyState::JUST_DOWN;
+    return KeyboardStates[K] == KeyState::JUST_DOWN;
+}
+
+bool InputState::IsMouseButtonDown(MouseButton M) {
+    return (MouseStates[M] == KeyState::DOWN || MouseStates[M] == KeyState::JUST_DOWN);
+}
+
+bool InputState::IsMouseButtonJustDown(MouseButton M) {
+    return MouseStates[M] == KeyState::JUST_DOWN;
 }

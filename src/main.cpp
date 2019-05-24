@@ -47,16 +47,14 @@ ECS_TYPE_IMPLEMENTATION;
 const float SCREEN_WIDTH = 1024.0f;
 const float SCREEN_HEIGHT = 768.0f;
 
-glm::vec2 MouseWheelDelta = glm::vec2(0.0f, 0.0f);
-glm::vec2 MousePosition = glm::vec2(0.0f, 0.0f);
-
 void ScrollCallback(GLFWwindow * Window, double OffsetX, double OffsetY) {
-   MouseWheelDelta.y = static_cast<float>(OffsetY);
+   InputState * Input = static_cast<InputState *>(glfwGetWindowUserPointer(Window));
+   Input->MouseWheelDelta = static_cast<float>(OffsetY);
 }
 
 void MousePositionCallback(GLFWwindow * Window, double PositionX, double PositionY) {
-   MousePosition.x = static_cast<float>(PositionX);
-   MousePosition.y = static_cast<float>(PositionY);
+   InputState * Input = static_cast<InputState *>(glfwGetWindowUserPointer(Window));
+   Input->MousePosition = glm::vec2(static_cast<float>(PositionX), static_cast<float>(PositionY));
 }
 
 int main(int argc, char * argv[]) {
@@ -152,11 +150,12 @@ int main(int argc, char * argv[]) {
    Entity->assign<PhysicsBody>(Body);
 
    // Input Entity
-   ECS::Entity * InputManager = EntityWorld->create();
-   InputManager->assign<Input>();
+   //ECS::Entity * InputManager = EntityWorld->create();
+   //InputManager->assign<Input>();
 
    // ####
-   InputState InputTest(Window);
+   InputState * InputTest = new InputState(Window);
+   glfwSetWindowUserPointer(Window, InputTest);
 
    double DeltaTime = 0.0f;
    double LastFrameTime = glfwGetTime();
@@ -167,37 +166,35 @@ int main(int argc, char * argv[]) {
       DeltaTime = CurrentTime - LastFrameTime;
       LastFrameTime = CurrentTime;
 
+      // Process Input
+      double InputPollStart = glfwGetTime();
+      InputTest->Update();
+      double InputPollEnd = glfwGetTime();
       glfwPollEvents();
 
-      double InputPollStart = glfwGetTime();
-      InputTest.Update();
-      double InputPollEnd = glfwGetTime();
+      if (InputTest->MouseWheelDelta > 0.0f)
+         Camera.ZoomIn(InputTest->MouseWheelDelta * 0.1f);
+      else if (InputTest->MouseWheelDelta < 0.0f)
+         Camera.ZoomOut(-InputTest->MouseWheelDelta * 0.1f);
 
-      std::cout << "Input Polling Time (ms): " << (InputPollEnd - InputPollStart) * 1000.0f << std::endl;
-
-      InputManager->get<Input>()->MousePosition = MousePosition;
-      InputManager->get<Input>()->MouseWheelDelta = MouseWheelDelta;
-
-      if (MouseWheelDelta.y > 0.0f)
-         Camera.ZoomIn(MouseWheelDelta.y * 0.1f);
-      else if (MouseWheelDelta.y < 0.0f)
-         Camera.ZoomOut(-MouseWheelDelta.y * 0.1f);
-
-      if (glfwGetKey(Window, GLFW_KEY_A) == GLFW_PRESS)
-         Camera.Translate(glm::vec2(-5.0f, 0.0f) * static_cast<float>(DeltaTime));
+      if (InputTest->IsKeyDown(Key::KEY_A))
+         Camera.Translate(glm::vec2(-5.0f, 0.0) * static_cast<float>(DeltaTime));
       
-      if (glfwGetKey(Window, GLFW_KEY_D) == GLFW_PRESS)
+      if (InputTest->IsKeyDown(Key::KEY_D))
          Camera.Translate(glm::vec2(5.0f, 0.0f) * static_cast<float>(DeltaTime));
 
-      if (glfwGetKey(Window, GLFW_KEY_W) == GLFW_PRESS)
+      if (InputTest->IsKeyDown(Key::KEY_W))
          Camera.Translate(glm::vec2(0.0f, -5.0f) * static_cast<float>(DeltaTime));
 
-      if (glfwGetKey(Window, GLFW_KEY_S) == GLFW_PRESS)
+      if (InputTest->IsKeyDown(Key::KEY_S))
          Camera.Translate(glm::vec2(0.0f, 5.0f) * static_cast<float>(DeltaTime));
 
+      if (InputTest->IsKeyJustDown(Key::KEY_TAB))
+         std::cout << InputTest->MousePosition.x << " " << InputTest->MousePosition.y << std::endl;
+
       // Test: Move sprite around world using mouse
-      if (glfwGetMouseButton(Window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-         glm::vec2 NewPos = Camera.ScreenToWorld(MousePosition);
+      if (InputTest->IsMouseButtonDown(MouseButton::MOUSE_BUTTON_RIGHT)) {
+         glm::vec2 NewPos = Camera.ScreenToWorld(InputTest->MousePosition);
          Entity->get<Transform>()->Position = NewPos;
       }
 
@@ -241,9 +238,11 @@ int main(int argc, char * argv[]) {
          ImGui::Text("Time Since Start: %.2f s", CurrentTime);
          ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
          ImGui::Text("Frame Count: %i", FrameCount);
-         ImGui::Text("Mouse Screen Position: %.0fx %.0fy", MousePosition.x, MousePosition.y);
-         glm::vec2 MouseWorldPos = Camera.ScreenToWorld(MousePosition);
+         glm::vec2 MouseP = InputTest->MousePosition;
+         ImGui::Text("Mouse Screen Position: %.0fx %.0fy", MouseP.x, MouseP.y);
+         glm::vec2 MouseWorldPos = Camera.ScreenToWorld(MouseP);
          ImGui::Text("Mouse World Position: %.4fx %.4fy", MouseWorldPos.x, MouseWorldPos.y);
+         ImGui::Text("Input Poll Time ms: %f", (InputPollEnd - InputPollStart) * 1000.0f);
          ImGui::End();
       }
 
@@ -292,15 +291,14 @@ int main(int argc, char * argv[]) {
 
       glfwSwapBuffers(Window);
 
-      // Reset Input for next frame
-      MouseWheelDelta.y = 0.0f;
-
       FrameCount++;
    }
 
    EntityWorld->cleanup();
    EntityWorld->destroyWorld();
    DebugRenderer.Destroy();
+
+   delete InputTest;
 
    ImGui_ImplOpenGL3_Shutdown();
    ImGui_ImplGlfw_Shutdown();

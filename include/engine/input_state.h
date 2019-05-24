@@ -1,7 +1,8 @@
 #ifndef INPUT_STATE_H
 #define INPUT_STATE_H
 
-#include "glfw/glfw3.h"
+#include <GLFW/glfw3.h>
+#include "glm/glm.hpp"
 
 enum Key {
     KEY_SPACE = GLFW_KEY_SPACE,
@@ -100,6 +101,17 @@ enum Key {
     KEY_MENU = GLFW_KEY_MENU
 };
 
+enum MouseButton {
+    MOUSE_BUTTON_LEFT = GLFW_MOUSE_BUTTON_1,
+    MOUSE_BUTTON_RIGHT = GLFW_MOUSE_BUTTON_2,
+    MOUSE_BUTTON_MIDDLE = GLFW_MOUSE_BUTTON_3,
+    MOUSE_BUTTON_4 = GLFW_MOUSE_BUTTON_4,
+    MOUSE_BUTTON_5 = GLFW_MOUSE_BUTTON_5,
+    MOUSE_BUTTON_6 = GLFW_MOUSE_BUTTON_6,
+    MOUSE_BUTTON_7 = GLFW_MOUSE_BUTTON_7,
+    MOUSE_BUTTON_8 = GLFW_MOUSE_BUTTON_8
+};
+
 enum KeyState {
     RELEASED,
     JUST_RELEASED,
@@ -112,15 +124,24 @@ class InputState {
         InputState(GLFWwindow * Window);
         ~InputState() { Window = 0; }
 
+        glm::vec2 MousePosition;
+        float MouseWheelDelta;
+
         void Update();
 
         bool IsKeyDown(Key K);
         bool IsKeyJustDown(Key K);
 
+        bool IsMouseButtonDown(MouseButton M);
+        bool IsMouseButtonJustDown(MouseButton M);
+
     private:
         static const Key AllKeys[];
+        static const MouseButton AllMouseButtons[];
 
-        KeyState States[512];
+        // Keyboard keys state
+        KeyState KeyboardStates[512];
+        KeyState MouseStates[8];
 
         GLFWwindow * Window;
 };
