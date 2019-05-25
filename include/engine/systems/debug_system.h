@@ -1,7 +1,7 @@
 #ifndef DEBUG_SYSTEM_H
 #define DEBUG_SYSTEM_H
 
-#include "engine/ecs/ECS.h"
+#include "engine/ECS.h"
 #include "engine/debug_draw.h"
 
 #include "Box2D/Box2D.h"

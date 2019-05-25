@@ -1,17 +1,15 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include "engine/ecs/ECS.h"
-
-#include "glm/glm.hpp"
+#include "engine/ECS.h"
+#include "engine/input_state.h"
 
 struct Input {
     ECS_DECLARE_TYPE;
 
-    Input() : MousePosition(0.0f), MouseWheelDelta(0.0f) { }
+    Input(InputState * I) : EngineInput(I) { }
 
-    glm::vec2 MousePosition;
-    glm::vec2 MouseWheelDelta;
+    InputState * EngineInput;
 };
 
 ECS_DEFINE_TYPE(Input);

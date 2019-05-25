@@ -1,7 +1,7 @@
 #ifndef RENDER_SYSTEM_H
 #define RENDER_SYSTEM_H
 
-#include "engine/ecs/ECS.h"
+#include "engine/ECS.h"
 
 #include "engine/sprite_renderer.h"
 

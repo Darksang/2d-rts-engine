@@ -1,7 +1,7 @@
 #ifndef TRANSFORM_H
 #define TRANSFORM_H
 
-#include "engine/ecs/ECS.h"
+#include "engine/ECS.h"
 
 #include "glm/glm.hpp"
 

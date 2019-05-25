@@ -3,8 +3,6 @@
 #include "engine/components/sprite.h"
 #include "engine/components/transform.h"
 
-#include <iostream>
-
 RenderSystem::RenderSystem(SpriteRenderer * Renderer) {
     this->Renderer = Renderer;
 }

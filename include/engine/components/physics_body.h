@@ -1,7 +1,7 @@
 #ifndef PHYSICS_BODY_H
 #define PHYSICS_BODY_H
 
-#include "engine/ecs/ECS.h"
+#include "engine/ECS.h"
 
 #include "Box2D/Box2D.h"
 

@@ -26,9 +26,10 @@ set(SRC ${SRC_DIR}/main.cpp
         ${SRC_DIR}/engine/sprite_renderer.cpp
         ${SRC_DIR}/engine/texture.cpp
 
-        ${SRC_DIR}/engine/systems/render_system.cpp
+        ${SRC_DIR}/engine/systems/camera_system.cpp
         ${SRC_DIR}/engine/systems/debug_system.cpp
         ${SRC_DIR}/engine/systems/physics_system.cpp
+        ${SRC_DIR}/engine/systems/render_system.cpp
 
         # Game Files
 

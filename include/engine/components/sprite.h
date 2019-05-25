@@ -1,7 +1,7 @@
 #ifndef SPRITE_H
 #define SPRITE_H
 
-#include "engine/ecs/ECS.h"
+#include "engine/ECS.h"
 #include "engine/texture.h"
 
 struct Sprite {

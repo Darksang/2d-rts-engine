@@ -29,16 +29,18 @@
 #include "engine/debug_draw.h"
 
 // #### ESC TEST
-#include "engine/ecs/ECS.h"
+#include "engine/ECS.h"
 ECS_TYPE_IMPLEMENTATION;
 
 // Components
+#include "engine/components/camera.h"
 #include "engine/components/input.h"
 #include "engine/components/physics_body.h"
 #include "engine/components/sprite.h"
 #include "engine/components/transform.h"
 
 // Systems
+#include "engine/systems/camera_system.h"
 #include "engine/systems/debug_system.h"
 #include "engine/systems/physics_system.h"
 #include "engine/systems/render_system.h"
@@ -109,21 +111,22 @@ int main(int argc, char * argv[]) {
    b2World PhysicsWorld(Gravity);
 
    // Camera
-   Camera2D Camera(SCREEN_WIDTH, SCREEN_HEIGHT, Engine::SCALE_FACTOR);
+   Camera2D EngineCamera(SCREEN_WIDTH, SCREEN_HEIGHT, Engine::SCALE_FACTOR);
 
    // Debug Renderer
    DebugDraw DebugRenderer;
-   DebugRenderer.Initialize(&Camera);
+   DebugRenderer.Initialize(&EngineCamera);
 
    // Sprite Renderer
    Shader SpriteShader("resources/shaders/vertex/sprite.glsl", "resources/shaders/fragment/sprite.glsl");
-   SpriteRenderer Renderer(SpriteShader, &Camera);
+   SpriteRenderer Renderer(SpriteShader, &EngineCamera);
 
    // #### ESC TEST
    ECS::World * EntityWorld = ECS::World::createWorld();
 
-   EntityWorld->registerSystem(new PhysicsSystem(&PhysicsWorld));
+   EntityWorld->registerSystem(new CameraSystem());
    EntityWorld->registerSystem(new DebugSystem(&PhysicsWorld, &DebugRenderer));
+   EntityWorld->registerSystem(new PhysicsSystem(&PhysicsWorld));
    EntityWorld->registerSystem(new RenderSystem(&Renderer));
 
    // Test entity
@@ -149,13 +152,17 @@ int main(int argc, char * argv[]) {
 
    Entity->assign<PhysicsBody>(Body);
 
-   // Input Entity
-   //ECS::Entity * InputManager = EntityWorld->create();
-   //InputManager->assign<Input>();
-
    // ####
    InputState * InputTest = new InputState(Window);
    glfwSetWindowUserPointer(Window, InputTest);
+
+   // Input Entity
+   ECS::Entity * InputEntity = EntityWorld->create();
+   InputEntity->assign<Input>(InputTest);
+
+   // Camera Entity
+   ECS::Entity * CameraEntity = EntityWorld->create();
+   CameraEntity->assign<Camera>(&EngineCamera);
 
    double DeltaTime = 0.0f;
    double LastFrameTime = glfwGetTime();
@@ -172,29 +179,9 @@ int main(int argc, char * argv[]) {
       double InputPollEnd = glfwGetTime();
       glfwPollEvents();
 
-      if (InputTest->MouseWheelDelta > 0.0f)
-         Camera.ZoomIn(InputTest->MouseWheelDelta * 0.1f);
-      else if (InputTest->MouseWheelDelta < 0.0f)
-         Camera.ZoomOut(-InputTest->MouseWheelDelta * 0.1f);
-
-      if (InputTest->IsKeyDown(Key::KEY_A))
-         Camera.Translate(glm::vec2(-5.0f, 0.0) * static_cast<float>(DeltaTime));
-      
-      if (InputTest->IsKeyDown(Key::KEY_D))
-         Camera.Translate(glm::vec2(5.0f, 0.0f) * static_cast<float>(DeltaTime));
-
-      if (InputTest->IsKeyDown(Key::KEY_W))
-         Camera.Translate(glm::vec2(0.0f, -5.0f) * static_cast<float>(DeltaTime));
-
-      if (InputTest->IsKeyDown(Key::KEY_S))
-         Camera.Translate(glm::vec2(0.0f, 5.0f) * static_cast<float>(DeltaTime));
-
-      if (InputTest->IsKeyJustDown(Key::KEY_TAB))
-         std::cout << InputTest->MousePosition.x << " " << InputTest->MousePosition.y << std::endl;
-
       // Test: Move sprite around world using mouse
       if (InputTest->IsMouseButtonDown(MouseButton::MOUSE_BUTTON_RIGHT)) {
-         glm::vec2 NewPos = Camera.ScreenToWorld(InputTest->MousePosition);
+         glm::vec2 NewPos = EngineCamera.ScreenToWorld(InputTest->MousePosition);
          Entity->get<Transform>()->Position = NewPos;
       }
 
@@ -223,12 +210,12 @@ int main(int argc, char * argv[]) {
       {
          ImGui::Begin("Camera");
          if (ImGui::CollapsingHeader("Position")) {
-            ImGui::BulletText("Position X: %.4f", Camera.Position.x);
-            ImGui::BulletText("Position Y: %.4f", Camera.Position.y);
+            ImGui::BulletText("Position X: %.4f", EngineCamera.Position.x);
+            ImGui::BulletText("Position Y: %.4f", EngineCamera.Position.y);
          }
-         ImGui::BulletText("Zoom: %.2f", Camera.Zoom);
-         ImGui::BulletText("Minimum Zoom: %.2f", Camera.MinimumZoom);
-         ImGui::BulletText("Maximum Zoom: %.2f", Camera.MaximumZoom);
+         ImGui::BulletText("Zoom: %.2f", EngineCamera.Zoom);
+         ImGui::BulletText("Minimum Zoom: %.2f", EngineCamera.MinimumZoom);
+         ImGui::BulletText("Maximum Zoom: %.2f", EngineCamera.MaximumZoom);
          ImGui::End();
       }
 
@@ -240,9 +227,9 @@ int main(int argc, char * argv[]) {
          ImGui::Text("Frame Count: %i", FrameCount);
          glm::vec2 MouseP = InputTest->MousePosition;
          ImGui::Text("Mouse Screen Position: %.0fx %.0fy", MouseP.x, MouseP.y);
-         glm::vec2 MouseWorldPos = Camera.ScreenToWorld(MouseP);
+         glm::vec2 MouseWorldPos = EngineCamera.ScreenToWorld(MouseP);
          ImGui::Text("Mouse World Position: %.4fx %.4fy", MouseWorldPos.x, MouseWorldPos.y);
-         ImGui::Text("Input Poll Time ms: %f", (InputPollEnd - InputPollStart) * 1000.0f);
+         ImGui::Text("Input Poll Time: %f ms", (InputPollEnd - InputPollStart) * 1000.0f);
          ImGui::End();
       }
 
@@ -274,16 +261,6 @@ int main(int argc, char * argv[]) {
       glClear(GL_COLOR_BUFFER_BIT);
 
       EntityWorld->tick(static_cast<float>(DeltaTime));
-
-      /*Renderer.Draw(Player);
-      Renderer.Draw(Player2); */
-
-      //DebugRenderer.DrawCircle(glm::vec2(1.0f, 0.0f), 2.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-      //DebugRenderer.DrawPoint(glm::vec2(1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 4.0f);
-      //DebugRenderer.DrawSegment(glm::vec2(1.0f, 0.0f), glm::vec2(3.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-      /*PhysicsWorld.DrawDebugData();
-      DebugRenderer.Render(); */
 
       // Render ImGui
       ImGui::Render();
