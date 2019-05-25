@@ -2,8 +2,6 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "engine/engine.h"
-
 SpriteRenderer::SpriteRenderer(Shader SpriteShader, Camera2D * Camera) : SpriteShader(SpriteShader), Camera(Camera) {
     Initialize();
 }
@@ -11,7 +9,7 @@ SpriteRenderer::SpriteRenderer(Shader SpriteShader, Camera2D * Camera) : SpriteS
 void SpriteRenderer::Draw(Transform & T, Sprite & S) {
     SpriteShader.Use();
 
-    float Factor = Engine::SCALE_FACTOR;
+    float Factor = Camera->GetScaleFactor();
 
     // Create Model Matrix
     glm::mat4 Model = glm::mat4(1.0f);

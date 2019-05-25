@@ -19,6 +19,7 @@ class Camera2D {
         void LookAt(const glm::vec2 & Point);
         void ZoomIn(float Zoom);
         void ZoomOut(float Zoom);
+        float GetScaleFactor() { return ScaleFactor; }
 
         glm::vec2 ScreenToWorld(const glm::vec2 & Point);
 

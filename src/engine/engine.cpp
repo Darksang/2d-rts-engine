@@ -32,7 +32,7 @@ void MousePositionCallback(GLFWwindow * Window, double PositionX, double Positio
 float Engine::PIXELS_PER_METER = 100.0f;
 float Engine::SCALE_FACTOR = 1.0f / PIXELS_PER_METER;
 
-Engine::Engine() : EngineWindow(0), EngineInput(0), EngineCamera(0), EngineDebugRenderer(0), EngineSpriteRenderer(0) {
+Engine::Engine() : EngineWindow(0), EngineInput(0), EngineCamera(0), EngineDebugRenderer(0), EngineSpriteRenderer(0), ActiveScene(this) {
     // Default resolution 1024x768
     ScreenWidth = 1024;
     ScreenHeight = 768;
@@ -50,6 +50,10 @@ Engine::~Engine() {
     delete EngineDebugRenderer;
 
     delete EngineSpriteRenderer;
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwDestroyWindow(EngineWindow);
     glfwTerminate();
@@ -78,6 +82,8 @@ void Engine::Start() {
     Shader SpriteShader("resources/shaders/vertex/sprite.glsl", "resources/shaders/fragment/sprite.glsl");
     EngineSpriteRenderer = new SpriteRenderer(SpriteShader, EngineCamera);
 
+    ActiveScene.Start();
+
     LastFrameTime = glfwGetTime();
 
     // Main game loop
@@ -87,8 +93,8 @@ void Engine::Start() {
         DeltaTime = CurrentTime - LastFrameTime;
         LastFrameTime = CurrentTime;
 
-        Update();
         UpdateGUI();
+        Update();
         Render();
 
         FrameCount++;
@@ -96,15 +102,17 @@ void Engine::Start() {
 }
 
 void Engine::Update() {
-    // Process Input
-    EngineInput->Update();
-    glfwPollEvents();
-}
-
-void Engine::Render() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // Process Input
+    EngineInput->Update();
+    glfwPollEvents();
+
+    ActiveScene.Update();
+}
+
+void Engine::Render() {
     // Render ImGui
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
