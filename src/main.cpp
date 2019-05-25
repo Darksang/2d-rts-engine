@@ -19,14 +19,12 @@
 
 #include "stb_image.h"
 
-#include "engine/engine.h"
 #include "engine/shader.h"
 #include "engine/sprite_renderer.h"
 #include "engine/texture.h"
-#include "engine/transform2d.h"
 #include "engine/input_state.h"
-
 #include "engine/debug_draw.h"
+#include "engine/engine.h"
 
 // #### ESC TEST
 #include "engine/ECS.h"
@@ -46,7 +44,7 @@ ECS_TYPE_IMPLEMENTATION;
 #include "engine/systems/render_system.h"
 // ####
 
-const float SCREEN_WIDTH = 1024.0f;
+/*const float SCREEN_WIDTH = 1024.0f;
 const float SCREEN_HEIGHT = 768.0f;
 
 void ScrollCallback(GLFWwindow * Window, double OffsetX, double OffsetY) {
@@ -57,10 +55,19 @@ void ScrollCallback(GLFWwindow * Window, double OffsetX, double OffsetY) {
 void MousePositionCallback(GLFWwindow * Window, double PositionX, double PositionY) {
    InputState * Input = static_cast<InputState *>(glfwGetWindowUserPointer(Window));
    Input->MousePosition = glm::vec2(static_cast<float>(PositionX), static_cast<float>(PositionY));
-}
+}*/
 
 int main(int argc, char * argv[]) {
-   glfwInit();
+   Engine * MainEngine = new Engine();
+
+   MainEngine->Start();
+
+   delete MainEngine;
+
+   return 0;
+
+   //MainGame.Start();
+   /*glfwInit();
 
    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -92,9 +99,9 @@ int main(int argc, char * argv[]) {
 
    glEnable(GL_CULL_FACE);
    glEnable(GL_BLEND);
-   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); */
 
-   // IMGUI
+   /* IMGUI
    IMGUI_CHECKVERSION();
    ImGui::CreateContext();
    ImGuiIO & io = ImGui::GetIO();
@@ -104,9 +111,9 @@ int main(int argc, char * argv[]) {
 
    const char * glsl_version = "#version 150";
    ImGui_ImplGlfw_InitForOpenGL(Window, true);
-   ImGui_ImplOpenGL3_Init(glsl_version);
+   ImGui_ImplOpenGL3_Init(glsl_version); */
 
-   // Box2D
+   /* Box2D
    b2Vec2 Gravity(0.0f, 0.0f); // Zero gravity, we only want collision detection
    b2World PhysicsWorld(Gravity);
 
@@ -150,21 +157,21 @@ int main(int argc, char * argv[]) {
    Body->CreateFixture(&FixtureDef);
    Body->SetUserData(Entity);
 
-   Entity->assign<PhysicsBody>(Body);
+   Entity->assign<PhysicsBody>(Body); */
 
-   // ####
+   /* ####
    InputState * InputTest = new InputState(Window);
-   glfwSetWindowUserPointer(Window, InputTest);
+   glfwSetWindowUserPointer(Window, InputTest); */
 
-   // Input Entity
+   /* Input Entity
    ECS::Entity * InputEntity = EntityWorld->create();
    InputEntity->assign<Input>(InputTest);
 
    // Camera Entity
    ECS::Entity * CameraEntity = EntityWorld->create();
-   CameraEntity->assign<Camera>(&EngineCamera);
+   CameraEntity->assign<Camera>(&EngineCamera); */
 
-   double DeltaTime = 0.0f;
+   /*double DeltaTime = 0.0f;
    double LastFrameTime = glfwGetTime();
    int FrameCount = 0;
 
@@ -269,19 +276,17 @@ int main(int argc, char * argv[]) {
       glfwSwapBuffers(Window);
 
       FrameCount++;
-   }
+   } */
 
-   EntityWorld->cleanup();
+   /*EntityWorld->cleanup();
    EntityWorld->destroyWorld();
-   DebugRenderer.Destroy();
+   DebugRenderer.Destroy(); */
 
-   delete InputTest;
+   /*delete InputTest;
 
    ImGui_ImplOpenGL3_Shutdown();
    ImGui_ImplGlfw_Shutdown();
    ImGui::DestroyContext();
    glfwDestroyWindow(Window);
-   glfwTerminate();
-
-   return 0;
+   glfwTerminate(); */
 }

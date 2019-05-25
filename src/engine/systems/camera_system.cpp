@@ -3,8 +3,6 @@
 #include "engine/components/camera.h"
 #include "engine/components/input.h"
 
-#include <iostream>
-
 void CameraSystem::configure(ECS::World * world) {
 
 }
