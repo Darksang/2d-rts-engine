@@ -36,7 +36,7 @@ void FramebufferCallback(GLFWwindow * Window, int Width, int Height) {
 float Engine::PIXELS_PER_METER = 100.0f;
 float Engine::SCALE_FACTOR = 1.0f / PIXELS_PER_METER;
 
-Engine::Engine() : EngineWindow(0), EngineMonitor(0), EngineInput(0), EngineCamera(0), EngineDebugRenderer(0), EngineSpriteRenderer(0), ActiveScene(this) {
+Engine::Engine() : EngineWindow(0), EngineMonitor(0), EngineInput(0), EngineCamera(0), EngineDebugRenderer(0), EngineSpriteRenderer(0) {
     // Default resolution 1024x768
     ScreenWidth = 1024;
     ScreenHeight = 768;
@@ -49,6 +49,10 @@ Engine::Engine() : EngineWindow(0), EngineMonitor(0), EngineInput(0), EngineCame
     DeltaTime = 0.0f;
     CurrentTime = 0.0f;
     FrameCount = 0;
+
+    // TODO: When we allow changing scenes while running, we should free 
+    // the current active scene memory before loading the next.
+    ActiveScene = new Scene(this);
 }
 
 Engine::~Engine() {
@@ -59,6 +63,8 @@ Engine::~Engine() {
     delete EngineDebugRenderer;
 
     delete EngineSpriteRenderer;
+
+    delete ActiveScene;
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -82,7 +88,7 @@ void Engine::Start() {
     glfwSetWindowUserPointer(EngineWindow, EngineInput);
 
     // Initialize camera
-    EngineCamera = new Camera2D(ScreenWidth, ScreenHeight, SCALE_FACTOR);
+    EngineCamera = new Camera2D(static_cast<float>(ScreenWidth), static_cast<float>(ScreenHeight), SCALE_FACTOR);
 
     // Initialize renderers
     EngineDebugRenderer = new DebugDraw();
@@ -91,7 +97,7 @@ void Engine::Start() {
     Shader SpriteShader("resources/shaders/vertex/sprite.glsl", "resources/shaders/fragment/sprite.glsl");
     EngineSpriteRenderer = new SpriteRenderer(SpriteShader, EngineCamera);
 
-    ActiveScene.Start();
+    ActiveScene->Start();
 
     LastFrameTime = glfwGetTime();
 
@@ -99,7 +105,7 @@ void Engine::Start() {
     while (!glfwWindowShouldClose(EngineWindow)) {
         // Calculate delta time
         CurrentTime = glfwGetTime();
-        DeltaTime = CurrentTime - LastFrameTime;
+        DeltaTime = static_cast<float>(CurrentTime - LastFrameTime);
         LastFrameTime = CurrentTime;
 
         UpdateGUI();
@@ -110,29 +116,6 @@ void Engine::Start() {
     }
 }
 
-void Engine::SetFullscreen(bool Fullscreen) {
-    if (Fullscreen == IsFullscreen)
-        return;
-
-    if (Fullscreen) {
-        glfwGetWindowPos(EngineWindow, &LastWindowPosX, &LastWindowPosY);
-        const GLFWvidmode * Mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        glfwSetWindowMonitor(EngineWindow, EngineMonitor, 0, 0, Mode->width, Mode->height, Mode->refreshRate);
-        ScreenWidth = Mode->width;
-        ScreenHeight = Mode->height;
-        EngineCamera->UpdateViewport(ScreenWidth, ScreenHeight);
-        EngineSpriteRenderer->UpdateOrtho();
-    } else {
-        glfwSetWindowMonitor(EngineWindow, 0, LastWindowPosX, LastWindowPosY, LastScreenWidth, LastScreenHeight, 0);
-        ScreenWidth = LastScreenWidth;
-        ScreenHeight = LastScreenHeight;
-        EngineCamera->UpdateViewport(ScreenWidth, ScreenHeight);
-        EngineSpriteRenderer->UpdateOrtho();
-    }
-
-    IsFullscreen = Fullscreen;
-}
-
 void Engine::Update() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -141,7 +124,7 @@ void Engine::Update() {
     EngineInput->Update();
     glfwPollEvents();
 
-    ActiveScene.Update();
+    ActiveScene->Update();
 }
 
 void Engine::Render() {
@@ -209,6 +192,29 @@ void Engine::InitializeGui() {
     const char * glsl_version = "#version 150";
     ImGui_ImplGlfw_InitForOpenGL(EngineWindow, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
+}
+
+void Engine::SetFullscreen(bool Fullscreen) {
+    if (Fullscreen == IsFullscreen)
+        return;
+
+    if (Fullscreen) {
+        glfwGetWindowPos(EngineWindow, &LastWindowPosX, &LastWindowPosY);
+        const GLFWvidmode * Mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        glfwSetWindowMonitor(EngineWindow, EngineMonitor, 0, 0, Mode->width, Mode->height, Mode->refreshRate);
+        ScreenWidth = Mode->width;
+        ScreenHeight = Mode->height;
+        EngineCamera->UpdateViewport(ScreenWidth, ScreenHeight);
+        EngineSpriteRenderer->UpdateOrtho();
+    } else {
+        glfwSetWindowMonitor(EngineWindow, 0, LastWindowPosX, LastWindowPosY, LastScreenWidth, LastScreenHeight, 0);
+        ScreenWidth = LastScreenWidth;
+        ScreenHeight = LastScreenHeight;
+        EngineCamera->UpdateViewport(ScreenWidth, ScreenHeight);
+        EngineSpriteRenderer->UpdateOrtho();
+    }
+
+    IsFullscreen = Fullscreen;
 }
 
 // Engine Gui ###################################################################################

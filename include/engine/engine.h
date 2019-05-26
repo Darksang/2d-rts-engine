@@ -51,9 +51,9 @@ class Engine {
         GLFWwindow * EngineWindow;
         GLFWmonitor * EngineMonitor;
 
-        float LastFrameTime;
+        double LastFrameTime;
 
-        Scene ActiveScene;
+        Scene * ActiveScene;
 
         bool InitializeVideo();
         void InitializeGui();
