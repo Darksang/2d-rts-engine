@@ -14,6 +14,7 @@ class Texture {
         int Width, Height;
         GLuint InternalFormat, Format;
 
+        Texture() : ID(0), Width(0), Height(0), InternalFormat(0), Format(0) { }
         Texture(const std::string & TexturePath, bool Alpha);
 
         void Bind();

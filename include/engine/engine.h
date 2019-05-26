@@ -5,9 +5,6 @@
 
 #include <GLFW/glfw3.h>
 
-#include "engine/ECS.h"
-ECS_TYPE_IMPLEMENTATION;
-
 #include "engine/camera2d.h"
 #include "engine/debug_draw.h"
 #include "engine/input_state.h"

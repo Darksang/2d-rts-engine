@@ -8,9 +8,7 @@
 #include "engine/shader.h"
 #include "engine/texture.h"
 #include "engine/camera2d.h"
-
-#include "engine/components/sprite.h"
-#include "engine/components/transform.h"
+#include "engine/sprite.h"
 
 class SpriteRenderer {
     public:
@@ -20,7 +18,7 @@ class SpriteRenderer {
 
         Camera2D * Camera;
 
-        void Draw(Transform & T, Sprite & S);
+        void Draw(Sprite & S);
 
         void UpdateOrtho();
 
