@@ -22,6 +22,8 @@ class SpriteRenderer {
 
         void Draw(Transform & T, Sprite & S);
 
+        void UpdateOrtho();
+
     private:
         GLuint VAO;
 

@@ -35,15 +35,15 @@ void Scene::Start() {
     // Initialize systems
     EntityWorld->registerSystem(new CameraSystem());
     EntityWorld->registerSystem(new PhysicsSystem(PhysicsWorld));
-    EntityWorld->registerSystem(new RenderSystem(EnginePointer->GetSpriteRenderer()));
+    EntityWorld->registerSystem(new RenderSystem(EnginePointer->EngineSpriteRenderer));
 
     // Camera Entity
     ECS::Entity * CameraEntity = EntityWorld->create();
-    CameraEntity->assign<Camera>(EnginePointer->GetCamera());
+    CameraEntity->assign<Camera>(EnginePointer->EngineCamera);
 
     // Input Entity
     ECS::Entity * InputEntity = EntityWorld->create();
-    InputEntity->assign<Input>(EnginePointer->GetInput());
+    InputEntity->assign<Input>(EnginePointer->EngineInput);
 
     // Test entities
     ECS::Entity * TestEntity = EntityWorld->create();

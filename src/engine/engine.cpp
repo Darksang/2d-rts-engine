@@ -26,6 +26,10 @@ void MousePositionCallback(GLFWwindow * Window, double PositionX, double Positio
     Input->MousePosition = glm::vec2(static_cast<float>(PositionX), static_cast<float>(PositionY));
 }
 
+void FramebufferCallback(GLFWwindow * Window, int Width, int Height) {
+    glViewport(0, 0, Width, Height);
+}
+
 // ################################################################################
 
 // 100 pixels equals 1 meter
@@ -109,6 +113,22 @@ void Engine::Update() {
     EngineInput->Update();
     glfwPollEvents();
 
+    /*if (EngineInput->IsKeyJustDown(Key::KEY_F1)) {
+        glfwSetWindowSize(EngineWindow, 1600, 900);
+        ScreenWidth = 1600;
+        ScreenHeight = 900;
+        EngineCamera->UpdateViewport(1600, 900);
+        EngineSpriteRenderer->UpdateOrtho();
+    }
+
+    if (EngineInput->IsKeyJustDown(Key::KEY_F2)) {
+        glfwSetWindowSize(EngineWindow, 1024, 768);
+        ScreenWidth = 1024;
+        ScreenHeight = 768;
+        EngineCamera->UpdateViewport(1024, 768);
+        EngineSpriteRenderer->UpdateOrtho();
+    } */
+
     ActiveScene.Update();
 }
 
@@ -147,6 +167,7 @@ bool Engine::InitializeVideo() {
     // Register window callbacks
     glfwSetCursorPosCallback(EngineWindow, MousePositionCallback);
     glfwSetScrollCallback(EngineWindow, ScrollCallback);
+    glfwSetFramebufferSizeCallback(EngineWindow, FramebufferCallback);
 
     // Load all OpenGL function pointers
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -176,11 +197,19 @@ void Engine::InitializeGui() {
     ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
+// Engine Gui ###################################################################################
+
+static void ShowSettingsWindow(bool * Open);
+static void ShowMiscInfoWindow(bool * Open, Engine * E);
+
 void Engine::UpdateGUI() {
     // IMGUI New Frame Prep
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+
+    static bool SettingsWindow = false;
+    static bool MiscInfoWindow = true;
 
     // ImGui Demo Window
     {
@@ -191,6 +220,10 @@ void Engine::UpdateGUI() {
     {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("General")) {
+                if (ImGui::MenuItem("Display Misc Info"))
+                    MiscInfoWindow = true;
+                if (ImGui::MenuItem("Settings"))
+                    SettingsWindow = true;
                 if (ImGui::MenuItem("Exit"))
                     glfwSetWindowShouldClose(EngineWindow, true);
                 ImGui::EndMenu();
@@ -199,17 +232,52 @@ void Engine::UpdateGUI() {
         }
     }
 
-    // Misc Info
-    {
-        ImGui::Begin("Info");
-        ImGui::Text("Time Since Start: %.2f s", CurrentTime);
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        ImGui::Text("Frame Count: %i", FrameCount);
-        ImGui::Text("Window Resolution: %ix%i", ScreenWidth, ScreenHeight);
-        glm::vec2 MouseP = EngineInput->MousePosition;
-        ImGui::Text("Mouse Screen Position: %.0fx %.0fy", MouseP.x, MouseP.y);
-        //glm::vec2 MouseWorldPos = EngineCamera.ScreenToWorld(MouseP);
-        //ImGui::Text("Mouse World Position: %.4fx %.4fy", MouseWorldPos.x, MouseWorldPos.y);
-        ImGui::End();
-    }
+    if (SettingsWindow)
+        ShowSettingsWindow(&SettingsWindow);
+
+    if (MiscInfoWindow)
+        ShowMiscInfoWindow(&MiscInfoWindow, this);
 }
+
+static void ShowSettingsWindow(bool * Open) {
+    ImGui::SetNextWindowPos(ImVec2(0, 100), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiCond_Always);
+
+    ImGuiWindowFlags Flags = 0;
+    Flags |= ImGuiWindowFlags_NoMove;
+    Flags |= ImGuiWindowFlags_NoResize;
+    Flags |= ImGuiWindowFlags_NoCollapse;
+
+    if (!ImGui::Begin("Settings", Open, Flags)) {
+        ImGui::End();
+        return;
+    }
+
+    ImGui::End();
+}
+
+static void ShowMiscInfoWindow(bool * Open, Engine * E) {
+    ImGui::SetNextWindowPos(ImVec2(0, static_cast<float>(E->ScreenHeight) - 120), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(350, 120), ImGuiCond_Always);
+
+    ImGuiWindowFlags Flags = 0;
+    Flags |= ImGuiWindowFlags_NoMove;
+    Flags |= ImGuiWindowFlags_NoResize;
+    Flags |= ImGuiWindowFlags_NoCollapse;
+
+    if (!ImGui::Begin("Misc Info", Open, Flags)) {
+        ImGui::End();
+        return;
+    }
+
+    ImGui::Text("Time Since Start: %.2f s", E->CurrentTime);
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::Text("Frame Count: %i", E->FrameCount);
+    ImGui::Text("Window Resolution: %ix%i", E->ScreenWidth, E->ScreenHeight);
+    glm::vec2 MouseP = E->EngineInput->MousePosition;
+    ImGui::Text("Mouse Screen Position: %.0fx %.0fy", MouseP.x, MouseP.y);
+
+    ImGui::End();
+}
+
+// ##############################################################################################

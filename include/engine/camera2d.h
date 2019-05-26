@@ -26,6 +26,8 @@ class Camera2D {
         glm::mat4 GetViewMatrix();
         glm::mat4 GetProjectionMatrix() { return ProjectionMatrix; }
 
+        void UpdateViewport(int Width, int Height);
+
     private:
         void ClampZoom(float Value);
 

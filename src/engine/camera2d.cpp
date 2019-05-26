@@ -5,7 +5,7 @@ Camera2D::Camera2D(float ScreenWidth, float ScreenHeight, float Scale) : Positio
     ViewportWidth = ScreenWidth * ScaleFactor;
     ViewportHeight = ScreenHeight * ScaleFactor;
 
-    // Left, Right, Top, Bottom, Near, Far
+    // Left, Right, Top, Bottom
     ProjectionMatrix = glm::ortho(0.0f, ViewportWidth, ViewportHeight, 0.0f);
 
     MinimumZoom = 0.5f;
@@ -40,6 +40,13 @@ glm::mat4 Camera2D::GetViewMatrix() {
     ViewMatrix = glm::scale(ViewMatrix, glm::vec3(Zoom, Zoom, 1.0f));
 
     return ViewMatrix;
+}
+
+void Camera2D::UpdateViewport(int Width, int Height) {
+    ViewportWidth = static_cast<float>(Width) * ScaleFactor;
+    ViewportHeight = static_cast<float>(Height) * ScaleFactor;
+
+    ProjectionMatrix = glm::ortho(0.0f, ViewportWidth, ViewportHeight, 0.0f);
 }
 
 void Camera2D::ClampZoom(float Value) {

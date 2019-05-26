@@ -36,6 +36,11 @@ void SpriteRenderer::Draw(Transform & T, Sprite & S) {
     glBindVertexArray(0);
 }
 
+void SpriteRenderer::UpdateOrtho() {
+    SpriteShader.Use();
+    SpriteShader.SetMat4("ProjectionMatrix", Camera->GetProjectionMatrix());
+}
+
 void SpriteRenderer::Initialize() {
     GLuint VBO;
 
