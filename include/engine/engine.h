@@ -27,6 +27,10 @@ class Engine {
 
         int LastScreenWidth;
         int LastScreenHeight;
+        int LastWindowPosX;
+        int LastWindowPosY;
+
+        bool IsFullscreen;
 
         float DeltaTime;
         double CurrentTime;

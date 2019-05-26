@@ -58,5 +58,6 @@ void Scene::Update() {
 }
 
 void Scene::GUI() {
-
+    ImGui::Begin("Scene");
+    ImGui::End();
 }

@@ -44,6 +44,8 @@ Engine::Engine() : EngineWindow(0), EngineMonitor(0), EngineInput(0), EngineCame
     LastScreenWidth = ScreenWidth;
     LastScreenHeight = ScreenHeight;
 
+    IsFullscreen = false;
+
     DeltaTime = 0.0f;
     CurrentTime = 0.0f;
     FrameCount = 0;
@@ -109,7 +111,26 @@ void Engine::Start() {
 }
 
 void Engine::SetFullscreen(bool Fullscreen) {
-    
+    if (Fullscreen == IsFullscreen)
+        return;
+
+    if (Fullscreen) {
+        glfwGetWindowPos(EngineWindow, &LastWindowPosX, &LastWindowPosY);
+        const GLFWvidmode * Mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        glfwSetWindowMonitor(EngineWindow, EngineMonitor, 0, 0, Mode->width, Mode->height, Mode->refreshRate);
+        ScreenWidth = Mode->width;
+        ScreenHeight = Mode->height;
+        EngineCamera->UpdateViewport(ScreenWidth, ScreenHeight);
+        EngineSpriteRenderer->UpdateOrtho();
+    } else {
+        glfwSetWindowMonitor(EngineWindow, 0, LastWindowPosX, LastWindowPosY, LastScreenWidth, LastScreenHeight, 0);
+        ScreenWidth = LastScreenWidth;
+        ScreenHeight = LastScreenHeight;
+        EngineCamera->UpdateViewport(ScreenWidth, ScreenHeight);
+        EngineSpriteRenderer->UpdateOrtho();
+    }
+
+    IsFullscreen = Fullscreen;
 }
 
 void Engine::Update() {
@@ -119,33 +140,6 @@ void Engine::Update() {
     // Process Input
     EngineInput->Update();
     glfwPollEvents();
-
-    if (EngineInput->IsKeyJustDown(Key::KEY_F1)) {
-        const GLFWvidmode * Mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        glfwSetWindowMonitor(EngineWindow, EngineMonitor, 0, 0, Mode->width, Mode->height, Mode->refreshRate);
-        ScreenWidth = Mode->width;
-        ScreenHeight = Mode->height;
-        EngineCamera->UpdateViewport(ScreenWidth, ScreenHeight);
-        EngineSpriteRenderer->UpdateOrtho();
-        //glfwSetWindowSize(EngineWindow, 1600, 900);
-        //ScreenWidth = 1600;
-        //ScreenHeight = 900;
-        //EngineCamera->UpdateViewport(1600, 900);
-        //EngineSpriteRenderer->UpdateOrtho();
-    }
-
-    if (EngineInput->IsKeyJustDown(Key::KEY_F2)) {
-        glfwSetWindowMonitor(EngineWindow, 0, 0, 0, 1024, 768, 0);
-        ScreenWidth = 1024;
-        ScreenHeight = 768;
-        EngineCamera->UpdateViewport(ScreenWidth, ScreenHeight);
-        EngineSpriteRenderer->UpdateOrtho();
-        //glfwSetWindowSize(EngineWindow, 1024, 768);
-        //ScreenWidth = 1024;
-        //ScreenHeight = 768;
-        //EngineCamera->UpdateViewport(1024, 768);
-        //EngineSpriteRenderer->UpdateOrtho();
-    }
 
     ActiveScene.Update();
 }
@@ -275,6 +269,12 @@ static void ShowSettingsWindow(bool * Open, Engine * E) {
 
     static bool Fullscreen = false;
     ImGui::Checkbox("Fullscreen", &Fullscreen);
+
+    ImGui::Separator();
+
+    if (ImGui::Button("Apply")) {
+        E->SetFullscreen(Fullscreen);
+    }
 
     ImGui::End();
 }
