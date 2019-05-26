@@ -25,6 +25,9 @@ class Engine {
         int ScreenWidth;
         int ScreenHeight;
 
+        int LastScreenWidth;
+        int LastScreenHeight;
+
         float DeltaTime;
         double CurrentTime;
         int FrameCount;
@@ -38,8 +41,11 @@ class Engine {
 
         void Start();
 
+        void SetFullscreen(bool Fullscreen);
+
     private:
         GLFWwindow * EngineWindow;
+        GLFWmonitor * EngineMonitor;
 
         float LastFrameTime;
 

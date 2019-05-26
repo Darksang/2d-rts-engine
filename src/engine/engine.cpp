@@ -36,10 +36,13 @@ void FramebufferCallback(GLFWwindow * Window, int Width, int Height) {
 float Engine::PIXELS_PER_METER = 100.0f;
 float Engine::SCALE_FACTOR = 1.0f / PIXELS_PER_METER;
 
-Engine::Engine() : EngineWindow(0), EngineInput(0), EngineCamera(0), EngineDebugRenderer(0), EngineSpriteRenderer(0), ActiveScene(this) {
+Engine::Engine() : EngineWindow(0), EngineMonitor(0), EngineInput(0), EngineCamera(0), EngineDebugRenderer(0), EngineSpriteRenderer(0), ActiveScene(this) {
     // Default resolution 1024x768
     ScreenWidth = 1024;
     ScreenHeight = 768;
+
+    LastScreenWidth = ScreenWidth;
+    LastScreenHeight = ScreenHeight;
 
     DeltaTime = 0.0f;
     CurrentTime = 0.0f;
@@ -105,6 +108,10 @@ void Engine::Start() {
     }
 }
 
+void Engine::SetFullscreen(bool Fullscreen) {
+    
+}
+
 void Engine::Update() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -113,21 +120,32 @@ void Engine::Update() {
     EngineInput->Update();
     glfwPollEvents();
 
-    /*if (EngineInput->IsKeyJustDown(Key::KEY_F1)) {
-        glfwSetWindowSize(EngineWindow, 1600, 900);
-        ScreenWidth = 1600;
-        ScreenHeight = 900;
-        EngineCamera->UpdateViewport(1600, 900);
+    if (EngineInput->IsKeyJustDown(Key::KEY_F1)) {
+        const GLFWvidmode * Mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        glfwSetWindowMonitor(EngineWindow, EngineMonitor, 0, 0, Mode->width, Mode->height, Mode->refreshRate);
+        ScreenWidth = Mode->width;
+        ScreenHeight = Mode->height;
+        EngineCamera->UpdateViewport(ScreenWidth, ScreenHeight);
         EngineSpriteRenderer->UpdateOrtho();
+        //glfwSetWindowSize(EngineWindow, 1600, 900);
+        //ScreenWidth = 1600;
+        //ScreenHeight = 900;
+        //EngineCamera->UpdateViewport(1600, 900);
+        //EngineSpriteRenderer->UpdateOrtho();
     }
 
     if (EngineInput->IsKeyJustDown(Key::KEY_F2)) {
-        glfwSetWindowSize(EngineWindow, 1024, 768);
+        glfwSetWindowMonitor(EngineWindow, 0, 0, 0, 1024, 768, 0);
         ScreenWidth = 1024;
         ScreenHeight = 768;
-        EngineCamera->UpdateViewport(1024, 768);
+        EngineCamera->UpdateViewport(ScreenWidth, ScreenHeight);
         EngineSpriteRenderer->UpdateOrtho();
-    } */
+        //glfwSetWindowSize(EngineWindow, 1024, 768);
+        //ScreenWidth = 1024;
+        //ScreenHeight = 768;
+        //EngineCamera->UpdateViewport(1024, 768);
+        //EngineSpriteRenderer->UpdateOrtho();
+    }
 
     ActiveScene.Update();
 }
@@ -164,6 +182,8 @@ bool Engine::InitializeVideo() {
 
     glfwMakeContextCurrent(EngineWindow);
 
+    EngineMonitor = glfwGetPrimaryMonitor();
+
     // Register window callbacks
     glfwSetCursorPosCallback(EngineWindow, MousePositionCallback);
     glfwSetScrollCallback(EngineWindow, ScrollCallback);
@@ -199,7 +219,7 @@ void Engine::InitializeGui() {
 
 // Engine Gui ###################################################################################
 
-static void ShowSettingsWindow(bool * Open);
+static void ShowSettingsWindow(bool * Open, Engine * E);
 static void ShowMiscInfoWindow(bool * Open, Engine * E);
 
 void Engine::UpdateGUI() {
@@ -233,13 +253,13 @@ void Engine::UpdateGUI() {
     }
 
     if (SettingsWindow)
-        ShowSettingsWindow(&SettingsWindow);
+        ShowSettingsWindow(&SettingsWindow, this);
 
     if (MiscInfoWindow)
         ShowMiscInfoWindow(&MiscInfoWindow, this);
 }
 
-static void ShowSettingsWindow(bool * Open) {
+static void ShowSettingsWindow(bool * Open, Engine * E) {
     ImGui::SetNextWindowPos(ImVec2(0, 100), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiCond_Always);
 
@@ -252,6 +272,9 @@ static void ShowSettingsWindow(bool * Open) {
         ImGui::End();
         return;
     }
+
+    static bool Fullscreen = false;
+    ImGui::Checkbox("Fullscreen", &Fullscreen);
 
     ImGui::End();
 }
