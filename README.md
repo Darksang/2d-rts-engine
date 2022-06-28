@@ -1,5 +1,9 @@
 # RTS Game
-Simple RTS game.
+Little 2D toy engine made with OpenGL for a RTS game (WIP).
+
+<p align="center">
+  <img src="https://github.com/Darksang/rts-game/blob/master/example.png" width="1000" title="Running Example">
+</p>
 
 # Compiling
 
