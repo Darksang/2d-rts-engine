@@ -1,4 +1,4 @@
-# RTS Game
+# 2D Engine
 Little 2D toy engine made with OpenGL for a RTS game (WIP).
 
 <p align="center">
